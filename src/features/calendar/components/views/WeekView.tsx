@@ -107,7 +107,7 @@ export const WeekView: React.FC<WeekViewProps> = ({
             )}
 
             {/* Blocks List */}
-            <div className="flex-1 flex flex-col gap-2 mt-3 overflow-y-auto">
+            <div className="flex-1 flex flex-col gap-2 mt-3 overflow-y-auto overflow-x-hidden">
               {dayBlocks.map(block => (
                 <div
                   key={block.id}
@@ -123,7 +123,7 @@ export const WeekView: React.FC<WeekViewProps> = ({
                       onContextMenu(e, block);
                     }
                   }}
-                  className="p-3 rounded-xl text-white shadow-xs cursor-grab active:cursor-grabbing hover:scale-[1.02] active:opacity-60 transition-transform flex flex-col gap-1"
+                  className="p-3 rounded-xl text-white shadow-xs cursor-grab active:cursor-grabbing hover:brightness-105 hover:shadow-md active:opacity-60 transition-all flex flex-col gap-1"
                   style={{ backgroundColor: block.color || subjects[block.subject]?.color || '#1abc9c' }}
                   title={`${block.subject}: ${block.topic} (Clic derecho para opciones)`}
                 >

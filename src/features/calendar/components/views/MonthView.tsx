@@ -143,7 +143,7 @@ export const MonthView: React.FC<MonthViewProps> = ({
               </div>
 
               {/* Day Class Blocks */}
-              <div className="flex flex-col gap-1 my-1 max-h-24 overflow-y-auto">
+              <div className="flex flex-col gap-1 my-1 max-h-24 overflow-y-auto overflow-x-hidden">
                 {dayBlocks.map(block => (
                   <div
                     key={block.id}
@@ -162,7 +162,7 @@ export const MonthView: React.FC<MonthViewProps> = ({
                         onContextMenu(e, block);
                       }
                     }}
-                    className="flex items-center justify-between px-2 py-1 rounded text-xs font-semibold text-white shadow-2xs hover:scale-[1.02] active:opacity-60 transition-transform truncate cursor-grab active:cursor-grabbing"
+                    className="flex items-center justify-between px-2 py-1 rounded text-xs font-semibold text-white shadow-2xs hover:brightness-110 hover:shadow-xs active:opacity-60 transition-all truncate cursor-grab active:cursor-grabbing"
                     style={{ backgroundColor: block.color || subjects[block.subject]?.color || '#1abc9c' }}
                     title={`${block.subject}: ${block.topic} (Clic derecho para opciones)`}
                   >
