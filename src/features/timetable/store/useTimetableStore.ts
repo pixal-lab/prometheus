@@ -42,6 +42,7 @@ interface TimetableStore {
   updateEvent: (day: DayOfWeek, eventId: string, updates: Partial<TimetableEvent>) => Promise<void>;
   deleteEvent: (day: DayOfWeek, eventId: string) => Promise<void>;
   duplicateEvent: (day: DayOfWeek, eventId: string) => Promise<void>;
+  copyEvent: (fromDay: DayOfWeek, toDay: DayOfWeek, eventId: string, newStartTime: string, newEndTime: string) => Promise<void>;
   moveEvent: (fromDay: DayOfWeek, toDay: DayOfWeek, eventId: string, newStartTime: string, newEndTime: string) => Promise<void>;
 
   resolveConflict: (resolution: 'replace' | 'push' | 'swap' | 'fit') => Promise<void>;
@@ -346,6 +347,50 @@ export const useTimetableStore = create<TimetableStore>((set, get) => ({
 
     data[day].events.push(dup);
     updateDayBoundaries(data, [day]);
+    set({
+      data,
+      undoStack: [...get().undoStack.slice(-30), prev],
+      redoStack: [],
+    });
+    await get().saveData();
+  },
+
+  copyEvent: async (fromDay, toDay, eventId, newStartTime, newEndTime) => {
+    const prev = JSON.parse(JSON.stringify(get().data)) as TimetableData;
+    const data = JSON.parse(JSON.stringify(get().data)) as TimetableData;
+    const orig = data[fromDay]?.events.find(e => e.id === eventId);
+    if (!orig) return;
+
+    const newEvent: TimetableEvent = {
+      ...orig,
+      id: `tt-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      startTime: newStartTime,
+      endTime: newEndTime,
+    };
+
+    const startM = timeToMinutes(newStartTime);
+    const endM = timeToMinutes(newEndTime);
+    const toEvents = data[toDay].events;
+    const conflict = toEvents.find(
+      e => Math.max(startM, timeToMinutes(e.startTime)) < Math.min(endM, timeToMinutes(e.endTime))
+    );
+
+    if (conflict) {
+      set({
+        conflictState: {
+          isOpen: true,
+          incomingEvent: newEvent,
+          targetDay: toDay,
+          conflictingEvent: conflict,
+        },
+      });
+      return;
+    }
+
+    toEvents.push(newEvent);
+    toEvents.sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
+    updateDayBoundaries(data, [toDay]);
+
     set({
       data,
       undoStack: [...get().undoStack.slice(-30), prev],

@@ -6,6 +6,9 @@ import { NotFoundPage } from './NotFoundPage';
 import { RootErrorBoundary } from './RootErrorBoundary';
 
 // Lazy load feature pages to split the 1.35MB monolithic bundle and maximize offline load speed
+const HomePage = React.lazy(() =>
+  import('../features/home/HomePage').then(m => ({ default: m.HomePage }))
+);
 const CalendarPage = React.lazy(() =>
   import('../features/calendar/CalendarPage').then(m => ({ default: m.CalendarPage }))
 );
@@ -40,6 +43,14 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
+        element: (
+          <Suspense fallback={<PageFallback />}>
+            <HomePage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'calendar',
         element: (
           <Suspense fallback={<PageFallback />}>
             <CalendarPage />

@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { useTranslation } from './useTranslation';
+import { translations } from './translations';
 import dayjs from 'dayjs';
 
 // Setup mock localStorage in node environment
@@ -105,5 +106,23 @@ describe('useTranslation & i18n system', () => {
     // Ensure English translations are different from Spanish for words that differ
     expect(state.t('calendar')).not.toBe('Calendario');
     expect(state.t('timetable')).not.toBe('Horario');
+  });
+
+  it('verifies dictionary symmetry between Spanish and English', () => {
+    const esKeys = Object.keys(translations.es);
+    const enKeys = Object.keys(translations.en);
+
+    const missingInEn = esKeys.filter(k => !(k in translations.en));
+    const missingInEs = enKeys.filter(k => !(k in translations.es));
+
+    if (missingInEn.length > 0) {
+      console.warn('Keys in ES missing in EN:', missingInEn);
+    }
+    if (missingInEs.length > 0) {
+      console.warn('Keys in EN missing in ES:', missingInEs);
+    }
+
+    expect(missingInEn).toEqual([]);
+    expect(missingInEs).toEqual([]);
   });
 });

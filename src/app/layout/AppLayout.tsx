@@ -14,6 +14,8 @@ export const AppLayout: React.FC = () => {
     const path = location.pathname;
     let pageTitle = '';
     if (path === '/' || path === '') {
+      pageTitle = t('home');
+    } else if (path.startsWith('/calendar')) {
       pageTitle = t('calendar');
     } else if (path.startsWith('/timetable')) {
       pageTitle = t('timetable');

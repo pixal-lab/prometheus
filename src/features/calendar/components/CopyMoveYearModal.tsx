@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { Modal } from '../../../components/ui/Modal';
 import { Button } from '../../../components/ui/Button';
+import { Select } from '../../../components/ui/Select';
 import { useCalendarStore } from '../store/useCalendarStore';
 import { useToast } from '../../../components/ui/Toast';
 import { useTranslation } from '../../../core/i18n/useTranslation';
-import { ArrowRight, Check } from 'lucide-react';
+import { ArrowRight, Check, Calendar } from 'lucide-react';
 
 interface CopyMoveYearModalProps {
   isOpen: boolean;
@@ -50,39 +51,27 @@ export const CopyMoveYearModal: React.FC<CopyMoveYearModalProps> = ({ isOpen, on
     <Modal isOpen={isOpen} onClose={onClose} title={t('copy_move_title')}>
       <div className="flex flex-col gap-5">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-bold uppercase tracking-wider text-slate-500">
-              {t('source_year')}
-            </label>
-            <select
-              value={sourceYearId}
-              onChange={e => setSourceYearId(Number(e.target.value))}
-              className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500"
-            >
-              {schoolYears.map(y => (
-                <option key={y.id} value={y.id}>
-                  {y.name} ({y.startDate} a {y.endDate})
-                </option>
-              ))}
-            </select>
-          </div>
+          <Select
+            label={t('source_year')}
+            value={sourceYearId}
+            onChange={e => setSourceYearId(Number(e.target.value))}
+            icon={<Calendar size={14} className="text-orange-500" />}
+            options={schoolYears.map(y => ({
+              value: y.id,
+              label: `${y.name} (${y.startDate} a ${y.endDate})`,
+            }))}
+          />
 
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-bold uppercase tracking-wider text-slate-500">
-              {t('target_year')}
-            </label>
-            <select
-              value={targetYearId}
-              onChange={e => setTargetYearId(Number(e.target.value))}
-              className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500"
-            >
-              {schoolYears.map(y => (
-                <option key={y.id} value={y.id}>
-                  {y.name} ({y.startDate} a {y.endDate})
-                </option>
-              ))}
-            </select>
-          </div>
+          <Select
+            label={t('target_year')}
+            value={targetYearId}
+            onChange={e => setTargetYearId(Number(e.target.value))}
+            icon={<Calendar size={14} className="text-orange-500" />}
+            options={schoolYears.map(y => ({
+              value: y.id,
+              label: `${y.name} (${y.startDate} a ${y.endDate})`,
+            }))}
+          />
         </div>
 
         {/* Subjects selection */}

@@ -55,9 +55,9 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
     <div
       ref={menuRef}
       style={{ left: `${adjustedX}px`, top: `${adjustedY}px` }}
-      className="fixed z-50 w-60 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl py-1 text-xs text-slate-700 dark:text-slate-200 animate-in fade-in zoom-in-95 duration-100"
+      className="fixed z-50 w-64 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl p-1.5 text-xs text-slate-700 dark:text-slate-200 flex flex-col gap-0.5 animate-in fade-in zoom-in-95 duration-100 select-none"
     >
-      <div className="px-3 py-1.5 border-b border-slate-100 dark:border-slate-800 font-bold text-slate-400 text-[10px] uppercase truncate">
+      <div className="px-2.5 py-1.5 border-b border-slate-100 dark:border-slate-800 font-bold text-slate-400 text-[10px] uppercase tracking-wider truncate mb-0.5">
         {event.subject}: {event.topic}
       </div>
 
@@ -66,7 +66,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
           onClose();
           onEdit(event);
         }}
-        className="w-full px-3 py-2 text-left flex items-center gap-2.5 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+        className="w-full px-2.5 py-1.5 rounded-xl text-left flex items-center gap-2.5 font-medium hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-colors cursor-pointer"
       >
         <Edit3 size={14} className="text-blue-500" />
         <span>{t('context_edit_class')}</span>
@@ -77,7 +77,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
           onClose();
           onReschedule(event, false);
         }}
-        className="w-full px-3 py-2 text-left flex items-center gap-2.5 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+        className="w-full px-2.5 py-1.5 rounded-xl text-left flex items-center gap-2.5 font-medium hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-colors cursor-pointer"
       >
         <ArrowRight size={14} className="text-orange-500" />
         <span>{t('context_reschedule_next')}</span>
@@ -88,7 +88,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
           onClose();
           onReschedule(event, true);
         }}
-        className="w-full px-3 py-2 text-left flex items-center gap-2.5 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+        className="w-full px-2.5 py-1.5 rounded-xl text-left flex items-center gap-2.5 font-medium hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-colors cursor-pointer"
       >
         <FastForward size={14} className="text-amber-500" />
         <span>{t('context_reschedule_cascade')}</span>
@@ -99,7 +99,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
           onClose();
           onMoveSubject(event.subject);
         }}
-        className="w-full px-3 py-2 text-left flex items-center gap-2.5 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+        className="w-full px-2.5 py-1.5 rounded-xl text-left flex items-center gap-2.5 font-medium hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-colors cursor-pointer"
       >
         <MoveHorizontal size={14} className="text-emerald-500" />
         <span>{t('context_move_course')}</span>
@@ -111,7 +111,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
             onClose();
             onViewLessonPlan(event);
           }}
-          className="w-full px-3 py-2 text-left flex items-center gap-2.5 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+          className="w-full px-2.5 py-1.5 rounded-xl text-left flex items-center gap-2.5 font-medium hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-colors cursor-pointer"
         >
           <BookOpen size={14} className="text-indigo-500" />
           <span>{t('context_view_plan')}</span>
@@ -125,7 +125,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
           onClose();
           onDelete(event);
         }}
-        className="w-full px-3 py-2 text-left flex items-center gap-2.5 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
+        className="w-full px-2.5 py-1.5 rounded-xl text-left flex items-center gap-2.5 font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
       >
         <Trash2 size={14} />
         <span>{t('context_delete')}</span>

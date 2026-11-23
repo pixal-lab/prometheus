@@ -23,6 +23,13 @@ export const NotFoundPage: React.FC = () => {
   const destinations = [
     {
       to: '/',
+      label: t('nav_home'),
+      title: t('title_home_nav'),
+      icon: Home,
+      descKey: 'home',
+    },
+    {
+      to: '/calendar',
       label: t('nav_calendar'),
       title: t('title_calendar_nav'),
       icon: Calendar,

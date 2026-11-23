@@ -76,4 +76,41 @@ describe('useCalendarStore - Subject and Course management', () => {
     const updatedBlock = state.classBlocks.find(b => b.id === 'b-1');
     expect(updatedBlock?.subject).toBe('Historia Universal');
   });
+
+  it('performs CRUD and undo/redo operations on class blocks', async () => {
+    const store = useCalendarStore.getState();
+
+    const id = await store.addBlock({
+      subject: 'Matemáticas',
+      topic: 'Fracciones',
+      date: '2026-04-06',
+      color: '#1abc9c',
+    });
+
+    let state = useCalendarStore.getState();
+    expect(state.classBlocks.length).toBe(1);
+    expect(state.classBlocks[0].id).toBe(id);
+
+    await store.updateBlock(id, { topic: 'Fracciones Avanzadas' });
+    state = useCalendarStore.getState();
+    expect(state.classBlocks[0].topic).toBe('Fracciones Avanzadas');
+
+    await store.duplicateBlock(id);
+    state = useCalendarStore.getState();
+    expect(state.classBlocks.length).toBe(2);
+    expect(state.classBlocks[1].topic).toBe('Fracciones Avanzadas (Copia)');
+
+    store.undo();
+    state = useCalendarStore.getState();
+    expect(state.classBlocks.length).toBe(1);
+
+    store.redo();
+    state = useCalendarStore.getState();
+    expect(state.classBlocks.length).toBe(2);
+
+    await store.deleteBlock(id);
+    state = useCalendarStore.getState();
+    expect(state.classBlocks.length).toBe(1);
+    expect(state.classBlocks[0].topic).toContain('(Copia)');
+  });
 });

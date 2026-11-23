@@ -14,7 +14,6 @@ import { YearView } from './components/views/YearView';
 import { AgendaView } from './components/views/AgendaView';
 import { EventModal } from './components/EventModal';
 import { DayTypeModal } from './components/DayTypeModal';
-import { SubjectSettingsModal } from './components/SubjectSettingsModal';
 import { CopyMoveYearModal } from './components/CopyMoveYearModal';
 import { ContextMenu } from './components/ContextMenu';
 import { MoveSubjectModal } from './components/MoveSubjectModal';
@@ -23,6 +22,7 @@ import { Button } from '../../components/ui/Button';
 import { ClassBlock } from '../../core/types/calendar.types';
 import { expandRecurringEvents } from './utils/recurrenceEngine';
 import { CalendarExportService } from './services/calendarExportService';
+import { useSettingsModal } from '../../core/settings/useSettingsModal';
 import { useToast } from '../../components/ui/Toast';
 import { useDialog } from '../../components/ui/Dialog';
 import {
@@ -46,6 +46,7 @@ export const CalendarPage: React.FC = () => {
   const { t } = useTranslation();
   const { showToast } = useToast();
   const { confirm } = useDialog();
+  const { openSettings } = useSettingsModal();
   const {
     classBlocks,
     subjects,
@@ -75,7 +76,6 @@ export const CalendarPage: React.FC = () => {
   const [selectedDayForAdd, setSelectedDayForAdd] = useState<string | undefined>(undefined);
 
   const [activeDateForDayType, setActiveDateForDayType] = useState<string | null>(null);
-  const [isSubjectsModalOpen, setIsSubjectsModalOpen] = useState(false);
   const [isCopyMoveModalOpen, setIsCopyMoveModalOpen] = useState(false);
 
   // Context Menu state
@@ -350,7 +350,7 @@ export const CalendarPage: React.FC = () => {
           </div>
 
           {/* Action Modals */}
-          <Button onClick={() => setIsSubjectsModalOpen(true)} variant="outline" size="sm" title={t('subject_mgmt_title')}>
+          <Button onClick={() => openSettings('courses')} variant="outline" size="sm" title={t('subject_mgmt_title')}>
             <Palette size={15} /> {t('subjects_btn')}
           </Button>
 
@@ -362,22 +362,29 @@ export const CalendarPage: React.FC = () => {
           <div className="relative" ref={exportMenuRef}>
             <button
               onClick={() => setIsExportMenuOpen(prev => !prev)}
-              className="h-8 px-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 shadow-2xs flex items-center gap-1.5 text-xs font-semibold transition-colors cursor-pointer"
+              className="h-9 px-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 shadow-2xs flex items-center gap-1.5 text-xs font-semibold transition-all cursor-pointer"
               title={t('export_calendar_plans')}
+              aria-expanded={isExportMenuOpen}
             >
               <Download size={14} className="text-orange-600 shrink-0" />
               <span>{t('export_btn')}</span>
-              <ChevronDown size={13} className={`text-slate-400 transition-transform ${isExportMenuOpen ? 'rotate-180' : ''}`} />
+              <ChevronDown
+                size={13}
+                className={`text-slate-400 transition-transform duration-200 ${isExportMenuOpen ? 'rotate-180' : ''}`}
+              />
             </button>
 
             {isExportMenuOpen && (
-              <div className="absolute right-0 mt-1.5 w-52 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl py-1 text-xs z-50 animate-in fade-in zoom-in-95 duration-100">
+              <div className="absolute right-0 mt-2 w-56 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl p-1.5 z-50 text-xs flex flex-col gap-0.5 animate-in fade-in zoom-in-95 duration-100 select-none">
+                <span className="px-2.5 pt-1.5 pb-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  {t('calendar')}
+                </span>
                 <button
                   onClick={() => {
                     setIsExportMenuOpen(false);
                     window.print();
                   }}
-                  className="w-full px-3 py-2 text-left flex items-center gap-2 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 cursor-pointer"
+                  className="w-full px-2.5 py-1.5 rounded-xl text-left flex items-center gap-2 font-medium hover:bg-slate-100 dark:hover:bg-slate-800/80 text-slate-700 dark:text-slate-200 transition-colors cursor-pointer"
                 >
                   <Printer size={14} className="text-orange-600 shrink-0" />
                   <span>{t('print_pdf')}</span>
@@ -388,7 +395,7 @@ export const CalendarPage: React.FC = () => {
                     const activeYear = schoolYears.find(y => y.id === activeSchoolYearId) || schoolYears[0];
                     CalendarExportService.exportCalendarToWord(classBlocks, activeYear);
                   }}
-                  className="w-full px-3 py-2 text-left flex items-center gap-2 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 cursor-pointer"
+                  className="w-full px-2.5 py-1.5 rounded-xl text-left flex items-center gap-2 font-medium hover:bg-slate-100 dark:hover:bg-slate-800/80 text-slate-700 dark:text-slate-200 transition-colors cursor-pointer"
                 >
                   <FileText size={14} className="text-blue-600 shrink-0" />
                   <span>{t('cal_word')}</span>
@@ -398,18 +405,23 @@ export const CalendarPage: React.FC = () => {
                     setIsExportMenuOpen(false);
                     CalendarExportService.exportCalendarToExcel(classBlocks);
                   }}
-                  className="w-full px-3 py-2 text-left flex items-center gap-2 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 cursor-pointer"
+                  className="w-full px-2.5 py-1.5 rounded-xl text-left flex items-center gap-2 font-medium hover:bg-slate-100 dark:hover:bg-slate-800/80 text-slate-700 dark:text-slate-200 transition-colors cursor-pointer"
                 >
                   <FileSpreadsheet size={14} className="text-emerald-600 shrink-0" />
                   <span>{t('cal_excel')}</span>
                 </button>
+
                 <div className="my-1 border-t border-slate-100 dark:border-slate-800" />
+
+                <span className="px-2.5 pt-1 pb-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  {t('lesson_plans_menu')}
+                </span>
                 <button
                   onClick={() => {
                     setIsExportMenuOpen(false);
                     CalendarExportService.exportLessonPlansToWord(classBlocks);
                   }}
-                  className="w-full px-3 py-2 text-left flex items-center gap-2 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 cursor-pointer"
+                  className="w-full px-2.5 py-1.5 rounded-xl text-left flex items-center gap-2 font-medium hover:bg-slate-100 dark:hover:bg-slate-800/80 text-slate-700 dark:text-slate-200 transition-colors cursor-pointer"
                 >
                   <FileText size={14} className="text-indigo-600 shrink-0" />
                   <span>{t('plans_word')}</span>
@@ -419,7 +431,7 @@ export const CalendarPage: React.FC = () => {
                     setIsExportMenuOpen(false);
                     CalendarExportService.exportCalendarToExcel(classBlocks, 'planes-de-leccion.csv');
                   }}
-                  className="w-full px-3 py-2 text-left flex items-center gap-2 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 cursor-pointer"
+                  className="w-full px-2.5 py-1.5 rounded-xl text-left flex items-center gap-2 font-medium hover:bg-slate-100 dark:hover:bg-slate-800/80 text-slate-700 dark:text-slate-200 transition-colors cursor-pointer"
                 >
                   <FileSpreadsheet size={14} className="text-teal-600 shrink-0" />
                   <span>{t('plans_excel')}</span>
@@ -543,11 +555,6 @@ export const CalendarPage: React.FC = () => {
           date={activeDateForDayType}
         />
       )}
-
-      <SubjectSettingsModal
-        isOpen={isSubjectsModalOpen}
-        onClose={() => setIsSubjectsModalOpen(false)}
-      />
 
       <CopyMoveYearModal
         isOpen={isCopyMoveModalOpen}

@@ -121,6 +121,76 @@ describe('useTimetableStore', () => {
     expect(state.data.tuesday.events[0].endTime).toBe('11:45');
   });
 
+  it('copies an event to another day and time slot without modifying the original event', async () => {
+    const store = useTimetableStore.getState();
+    await store.addEvent('monday', {
+      title: 'Física',
+      startTime: '08:00',
+      endTime: '09:30',
+      color: '#3498db',
+      type: 'course',
+      notes: 'Laboratorio',
+    });
+
+    const eventId = useTimetableStore.getState().data.monday.events[0].id;
+    await store.copyEvent('monday', 'wednesday', eventId, '11:00', '12:30');
+
+    const state = useTimetableStore.getState();
+    // Original event remains intact on Monday
+    expect(state.data.monday.events.length).toBe(1);
+    expect(state.data.monday.events[0].id).toBe(eventId);
+    expect(state.data.monday.events[0].title).toBe('Física');
+    expect(state.data.monday.events[0].startTime).toBe('08:00');
+    expect(state.data.monday.events[0].endTime).toBe('09:30');
+
+    // New copied event created on Wednesday
+    expect(state.data.wednesday.events.length).toBe(1);
+    expect(state.data.wednesday.events[0].id).not.toBe(eventId);
+    expect(state.data.wednesday.events[0].title).toBe('Física');
+    expect(state.data.wednesday.events[0].startTime).toBe('11:00');
+    expect(state.data.wednesday.events[0].endTime).toBe('12:30');
+    expect(state.data.wednesday.events[0].color).toBe('#3498db');
+    expect(state.data.wednesday.events[0].notes).toBe('Laboratorio');
+
+    // Undo removes the copy and keeps original
+    store.undo();
+    const afterUndo = useTimetableStore.getState();
+    expect(afterUndo.data.monday.events.length).toBe(1);
+    expect(afterUndo.data.wednesday.events.length).toBe(0);
+  });
+
+  it('detects conflict when copying to an occupied slot without altering the original event', async () => {
+    const store = useTimetableStore.getState();
+    await store.addEvent('monday', {
+      title: 'Música',
+      startTime: '08:00',
+      endTime: '09:30',
+      color: '#e74c3c',
+      type: 'course',
+    });
+
+    await store.addEvent('friday', {
+      title: 'Taller',
+      startTime: '09:00',
+      endTime: '10:00',
+      color: '#2ecc71',
+      type: 'special',
+    });
+
+    const musicaId = useTimetableStore.getState().data.monday.events[0].id;
+    // Copy Música to Friday 09:00 - 10:30 (overlaps with Taller)
+    await store.copyEvent('monday', 'friday', musicaId, '09:00', '10:30');
+
+    const state = useTimetableStore.getState();
+    expect(state.conflictState?.isOpen).toBe(true);
+    expect(state.conflictState?.targetDay).toBe('friday');
+    expect(state.conflictState?.incomingEvent.title).toBe('Música');
+    expect(state.conflictState?.conflictingEvent.title).toBe('Taller');
+    // Original event still exists untouched on Monday
+    expect(state.data.monday.events.length).toBe(1);
+    expect(state.data.monday.events[0].title).toBe('Música');
+  });
+
   describe('resolveConflict', () => {
     it('resolves conflict using replace: deletes conflicting event and places new one', async () => {
       const store = useTimetableStore.getState();

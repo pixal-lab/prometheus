@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Modal } from '../../../components/ui/Modal';
 import { Button } from '../../../components/ui/Button';
+import { Input } from '../../../components/ui/Input';
 import { useCalendarStore } from '../store/useCalendarStore';
 import { useToast } from '../../../components/ui/Toast';
 import { useTranslation } from '../../../core/i18n/useTranslation';
@@ -36,15 +37,14 @@ export const MoveSubjectModal: React.FC<MoveSubjectModalProps> = ({ isOpen, onCl
         </p>
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-bold uppercase tracking-wider text-slate-500">
-            {t('days_to_shift')}
-          </label>
-          <input
+          <Input
+            label={t('days_to_shift')}
             type="number"
             step="1"
+            icon={<MoveHorizontal size={15} className="text-orange-500" />}
             value={daysToMove}
             onChange={e => setDaysToMove(parseInt(e.target.value) || 0)}
-            className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500 font-mono font-bold"
+            className="font-mono font-bold"
           />
           <span className="text-[10px] text-slate-400">
             {t('days_to_shift_hint')}

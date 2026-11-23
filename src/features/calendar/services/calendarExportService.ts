@@ -1,5 +1,15 @@
 import { ClassBlock, SchoolYear } from '../../../core/types/calendar.types';
 
+function escapeHtml(str?: string): string {
+  if (!str) return '';
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 export class CalendarExportService {
   /**
    * Exporta la lista de clases a formato CSV compatible con Microsoft Excel (con BOM UTF-8)
@@ -41,11 +51,11 @@ export class CalendarExportService {
       .map(
         b => `
       <tr>
-        <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">${b.date}</td>
-        <td style="padding: 8px; border: 1px solid #ddd; color: #d35400;">${b.subject}</td>
-        <td style="padding: 8px; border: 1px solid #ddd;">${b.topic}</td>
+        <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">${escapeHtml(b.date)}</td>
+        <td style="padding: 8px; border: 1px solid #ddd; color: #d35400;">${escapeHtml(b.subject)}</td>
+        <td style="padding: 8px; border: 1px solid #ddd;">${escapeHtml(b.topic)}</td>
         <td style="padding: 8px; border: 1px solid #ddd;">${b.evaluation ? 'Sí' : 'No'}</td>
-        <td style="padding: 8px; border: 1px solid #ddd;">${b.notes || '-'}</td>
+        <td style="padding: 8px; border: 1px solid #ddd;">${escapeHtml(b.notes || '-')}</td>
       </tr>`
       )
       .join('');
@@ -103,17 +113,17 @@ export class CalendarExportService {
         const lp = b.lessonPlan || {};
         return `
         <div style="margin-bottom: 30px; page-break-after: always;">
-          <h2 style="color: #2980b9;">${b.subject} - ${b.topic} (${b.date})</h2>
+          <h2 style="color: #2980b9;">${escapeHtml(b.subject)} - ${escapeHtml(b.topic)} (${escapeHtml(b.date)})</h2>
           <h3>Objetivos:</h3>
-          <p>${lp.objectives || 'No especificados'}</p>
+          <p>${escapeHtml(lp.objectives || 'No especificados')}</p>
           <h3>Materiales y Recursos:</h3>
-          <p>${lp.materials || lp.readings || 'No especificados'}</p>
+          <p>${escapeHtml(lp.materials || lp.readings || 'No especificados')}</p>
           <h3>Actividades / Desarrollo:</h3>
-          <p>${lp.activities || lp.presentation || 'No especificadas'}</p>
+          <p>${escapeHtml(lp.activities || lp.presentation || 'No especificadas')}</p>
           <h3>Evaluación:</h3>
-          <p>${lp.assessment || (b.evaluation ? b.evaluationDetails : 'Formativa continua')}</p>
+          <p>${escapeHtml(lp.assessment || (b.evaluation ? b.evaluationDetails : 'Formativa continua'))}</p>
           <h3>Notas y Adaptaciones (DUA):</h3>
-          <p>${lp.notes || lp.accommodations || '-'}</p>
+          <p>${escapeHtml(lp.notes || lp.accommodations || '-')}</p>
         </div>`;
       })
       .join('<hr style="border: 1px solid #ccc; margin: 20px 0;"/>');

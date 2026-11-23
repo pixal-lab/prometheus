@@ -23,6 +23,7 @@ interface GradebookStore {
   setActiveTab: (tab: 'dashboard' | 'grades' | 'attendance' | 'notes') => void;
 
   addCourse: (name: string, subjectsStr: string) => Promise<Course>;
+  deleteCourse: (courseId: number) => Promise<void>;
   updateCourseCategories: (courseId: number, categories: CategoryWeight[]) => Promise<void>;
 
   addStudent: (name: string, courseId: number) => Promise<Student>;
@@ -133,6 +134,23 @@ export const useGradebookStore = create<GradebookStore>((set, get) => ({
     set({ data });
     await get().saveData();
     return newCourse;
+  },
+
+  deleteCourse: async courseId => {
+    const data = JSON.parse(JSON.stringify(get().data)) as GradebookData;
+    data.courses = data.courses.filter(c => c.id !== courseId);
+    const studentIds = new Set(data.students.filter(s => s.courseId === courseId).map(s => s.id));
+    data.students = data.students.filter(s => s.courseId !== courseId);
+    data.grades = data.grades.filter(g => !studentIds.has(g.studentId));
+    data.attendance = data.attendance.filter(a => !studentIds.has(a.studentId));
+    data.observations = data.observations.filter(o => !studentIds.has(o.studentId));
+    data.reminders = data.reminders.filter(r => !studentIds.has(r.studentId));
+
+    if (data.selectedCourseId === courseId) {
+      data.selectedCourseId = data.courses[0]?.id || null;
+    }
+    set({ data });
+    await get().saveData();
   },
 
   updateCourseCategories: async (courseId, categories) => {

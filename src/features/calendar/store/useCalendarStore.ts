@@ -97,6 +97,10 @@ const defaultDayPalette: CustomDayColor[] = [
   { color: '#f57f17', label: 'Salida Temprana' },
 ];
 
+const MAX_UNDO_LIMIT = 50;
+const pushUndo = (stack: ClassBlock[][], current: ClassBlock[]): ClassBlock[][] =>
+  [...stack, current].slice(-MAX_UNDO_LIMIT);
+
 export const useCalendarStore = create<CalendarStore>((set, get) => ({
   classBlocks: [],
   subjects: defaultSubjects,
@@ -263,7 +267,7 @@ export const useCalendarStore = create<CalendarStore>((set, get) => ({
 
     const previous = undoStack[undoStack.length - 1];
     const newUndo = undoStack.slice(0, -1);
-    const newRedo = [...redoStack, classBlocks];
+    const newRedo = [...redoStack, classBlocks].slice(-MAX_UNDO_LIMIT);
 
     set({ classBlocks: previous, undoStack: newUndo, redoStack: newRedo });
     get().saveData();
@@ -275,7 +279,7 @@ export const useCalendarStore = create<CalendarStore>((set, get) => ({
 
     const next = redoStack[redoStack.length - 1];
     const newRedo = redoStack.slice(0, -1);
-    const newUndo = [...undoStack, classBlocks];
+    const newUndo = pushUndo(undoStack, classBlocks);
 
     set({ classBlocks: next, undoStack: newUndo, redoStack: newRedo });
     get().saveData();
@@ -288,7 +292,7 @@ export const useCalendarStore = create<CalendarStore>((set, get) => ({
 
     set({
       classBlocks: [...classBlocks, newBlock],
-      undoStack: [...undoStack, classBlocks],
+      undoStack: pushUndo(undoStack, classBlocks),
       redoStack: [],
     });
     await get().saveData();
@@ -301,7 +305,7 @@ export const useCalendarStore = create<CalendarStore>((set, get) => ({
 
     set({
       classBlocks: updated,
-      undoStack: [...undoStack, classBlocks],
+      undoStack: pushUndo(undoStack, classBlocks),
       redoStack: [],
     });
     await get().saveData();
@@ -313,7 +317,7 @@ export const useCalendarStore = create<CalendarStore>((set, get) => ({
 
     set({
       classBlocks: updated,
-      undoStack: [...undoStack, classBlocks],
+      undoStack: pushUndo(undoStack, classBlocks),
       redoStack: [],
     });
     await get().saveData();
@@ -332,7 +336,7 @@ export const useCalendarStore = create<CalendarStore>((set, get) => ({
 
     set({
       classBlocks: [...classBlocks, dup],
-      undoStack: [...undoStack, classBlocks],
+      undoStack: pushUndo(undoStack, classBlocks),
       redoStack: [],
     });
     await get().saveData();
@@ -344,7 +348,7 @@ export const useCalendarStore = create<CalendarStore>((set, get) => ({
 
     set({
       classBlocks: updated,
-      undoStack: [...undoStack, classBlocks],
+      undoStack: pushUndo(undoStack, classBlocks),
       redoStack: [],
     });
     await get().saveData();
@@ -371,7 +375,7 @@ export const useCalendarStore = create<CalendarStore>((set, get) => ({
       subjects,
       subjectOrder,
       classBlocks,
-      undoStack: [...get().undoStack, prevBlocks],
+      undoStack: pushUndo(get().undoStack, prevBlocks),
       redoStack: [],
     });
     await get().saveData();
@@ -511,7 +515,7 @@ export const useCalendarStore = create<CalendarStore>((set, get) => ({
 
     set({
       classBlocks: updatedBlocks,
-      undoStack: [...undoStack, classBlocks],
+      undoStack: pushUndo(undoStack, classBlocks),
       redoStack: [],
     });
     await get().saveData();
@@ -544,7 +548,7 @@ export const useCalendarStore = create<CalendarStore>((set, get) => ({
 
     set({
       classBlocks: updatedBlocks,
-      undoStack: [...undoStack, classBlocks],
+      undoStack: pushUndo(undoStack, classBlocks),
       redoStack: [],
     });
     await get().saveData();
@@ -579,7 +583,7 @@ export const useCalendarStore = create<CalendarStore>((set, get) => ({
 
     set({
       classBlocks: updatedBlocks,
-      undoStack: [...undoStack, classBlocks],
+      undoStack: pushUndo(undoStack, classBlocks),
       redoStack: [],
     });
     await get().saveData();
@@ -667,7 +671,7 @@ export const useCalendarStore = create<CalendarStore>((set, get) => ({
 
     set({
       classBlocks: updatedBlocks,
-      undoStack: [...undoStack, classBlocks],
+      undoStack: pushUndo(undoStack, classBlocks),
       redoStack: [],
     });
     await get().saveData();

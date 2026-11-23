@@ -78,7 +78,10 @@ export const GradeMatrix: React.FC<GradeMatrixProps> = ({
       }
     });
 
-    if (totalWeightUsed === 0) return '-';
+    if (totalWeightUsed === 0) {
+      const avg = sGrades.reduce((sum, g) => sum + g.grade, 0) / sGrades.length;
+      return avg.toFixed(1);
+    }
     const finalAvg = (weightedSum / totalWeightUsed) * 100;
     return finalAvg.toFixed(1);
   };
@@ -213,10 +216,10 @@ export const GradeMatrix: React.FC<GradeMatrixProps> = ({
                           }}
                           placeholder="-"
                           className={`w-16 py-1 px-2 text-center text-sm font-mono font-bold rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors ${val && Number(val) >= 4.0
-                              ? 'text-emerald-600 dark:text-emerald-400'
-                              : val && Number(val) < 4.0
-                                ? 'text-rose-600 dark:text-rose-400'
-                                : 'text-slate-400'
+                            ? 'text-emerald-600 dark:text-emerald-400'
+                            : val && Number(val) < 4.0
+                              ? 'text-rose-600 dark:text-rose-400'
+                              : 'text-slate-400'
                             }`}
                         />
                       </td>
@@ -226,10 +229,10 @@ export const GradeMatrix: React.FC<GradeMatrixProps> = ({
                   <td className="py-2.5 px-4 text-center">
                     <span
                       className={`inline-block font-mono font-bold text-base px-2.5 py-0.5 rounded-lg ${avg === '-'
-                          ? 'text-slate-400'
-                          : isPassing
-                            ? 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400'
-                            : 'bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400'
+                        ? 'text-slate-400'
+                        : isPassing
+                          ? 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400'
+                          : 'bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400'
                         }`}
                     >
                       {avg}

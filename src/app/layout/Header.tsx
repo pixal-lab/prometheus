@@ -1,15 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import {
+  Home,
   Calendar,
   Clock,
   BookOpen,
   GraduationCap,
   Calculator,
-  Moon,
-  Sun,
-  Globe,
-  HardDrive,
   Cog,
   Download,
   FileSpreadsheet,
@@ -19,21 +16,17 @@ import {
   Flame,
 } from 'lucide-react';
 import { useTranslation } from '../../core/i18n/useTranslation';
-import { useTheme } from '../../core/theme/useTheme';
 import { useCalendarStore } from '../../features/calendar/store/useCalendarStore';
 import { CalendarExportService } from '../../features/calendar/services/calendarExportService';
-import { BackupModal } from './BackupModal';
-import { SettingsModal, SettingsTab } from './SettingsModal';
+import { SettingsModal } from './SettingsModal';
+import { useSettingsModal } from '../../core/settings/useSettingsModal';
 import { reloadAllStores } from '../../core/storage/rehydrate';
 
 export const Header: React.FC = () => {
-  const { t, language, setLanguage } = useTranslation();
-  const { theme, toggleTheme } = useTheme();
+  const { t } = useTranslation();
   const { schoolYears, activeSchoolYearId, setActiveSchoolYear, classBlocks } = useCalendarStore();
+  const { isOpen: isSettingsOpen, activeTab: settingsSection, openSettings, closeSettings } = useSettingsModal();
 
-  const [isBackupOpen, setIsBackupOpen] = useState(false);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [settingsSection, setSettingsSection] = useState<SettingsTab>('general');
   const [isExportMenuOpen, setIsExportMenuOpen] = useState(false);
   const [isYearMenuOpen, setIsYearMenuOpen] = useState(false);
   const exportMenuRef = useRef<HTMLDivElement>(null);
@@ -55,7 +48,8 @@ export const Header: React.FC = () => {
   const activeYear = schoolYears.find(y => y.id === activeSchoolYearId) || schoolYears[0];
 
   const navItems = [
-    { to: '/', label: t('nav_calendar'), title: t('title_calendar_nav'), icon: Calendar },
+    { to: '/', label: t('nav_home'), title: t('title_home_nav'), icon: Home, end: true },
+    { to: '/calendar', label: t('nav_calendar'), title: t('title_calendar_nav'), icon: Calendar },
     { to: '/timetable', label: t('nav_timetable'), title: t('title_timetable_nav'), icon: Clock },
     { to: '/lesson-planner', label: t('nav_lesson_planner'), title: t('title_planner_nav'), icon: BookOpen },
     { to: '/gradebook', label: t('nav_gradebook'), title: t('title_gradebook_nav'), icon: GraduationCap },
@@ -72,6 +66,9 @@ export const Header: React.FC = () => {
             <span className="font-extrabold text-lg tracking-tight bg-gradient-to-r from-orange-600 to-amber-500 bg-clip-text text-transparent">
               Prometheus
             </span>
+            <span className="text-[10px] font-extrabold tracking-wider px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 uppercase shadow-2xs">
+              HUB
+            </span>
           </NavLink>
 
           {/* Center Navigation Links: Clean segmented pill */}
@@ -82,6 +79,7 @@ export const Header: React.FC = () => {
                 <NavLink
                   key={item.to}
                   to={item.to}
+                  end={item.end}
                   title={item.title}
                   className={({ isActive }) =>
                     `h-8 px-3 rounded-xl text-xs font-bold whitespace-nowrap inline-flex items-center gap-2 transition-all select-none ${isActive
@@ -171,8 +169,7 @@ export const Header: React.FC = () => {
                         type="button"
                         onClick={() => {
                           setIsYearMenuOpen(false);
-                          setSettingsSection('years');
-                          setIsSettingsOpen(true);
+                          openSettings('years');
                         }}
                         className="w-full px-2.5 py-1.5 text-left rounded-xl text-[11px] font-semibold text-slate-600 dark:text-slate-400 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 flex items-center gap-2 transition-colors cursor-pointer"
                       >
@@ -263,41 +260,14 @@ export const Header: React.FC = () => {
 
             <div className="h-4 w-px bg-slate-200 dark:border-slate-800 mx-0.5 hidden sm:block" />
 
-            {/* Utility Icon Buttons: Uniform h-9 w-9, rounded-xl, size={16} */}
+            {/* Centralized Global Settings Button */}
             <button
-              onClick={() => setIsBackupOpen(true)}
-              className="w-9 h-9 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-orange-600 dark:hover:text-orange-400 shadow-2xs flex items-center justify-center transition-colors cursor-pointer shrink-0"
-              title={t('title_backups')}
-            >
-              <HardDrive size={16} />
-            </button>
-
-            <button
-              onClick={() => setLanguage(language === 'es' ? 'en' : 'es')}
-              className="h-9 px-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 shadow-2xs flex items-center gap-1.5 text-xs font-bold transition-colors uppercase cursor-pointer shrink-0"
-              title={t('language')}
-            >
-              <Globe size={15} className="text-slate-400 shrink-0" />
-              <span>{language}</span>
-            </button>
-
-            <button
-              onClick={toggleTheme}
-              className="w-9 h-9 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-amber-500 dark:hover:text-amber-400 shadow-2xs flex items-center justify-center transition-colors cursor-pointer shrink-0"
-              title={theme === 'dark' ? t('light_mode') : t('dark_mode')}
-            >
-              {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
-            </button>
-
-            <button
-              onClick={() => {
-                setSettingsSection('general');
-                setIsSettingsOpen(true);
-              }}
-              className="w-9 h-9 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-orange-600 dark:hover:text-orange-400 shadow-2xs flex items-center justify-center transition-colors cursor-pointer shrink-0"
+              onClick={() => openSettings('general')}
+              className="h-9 px-2.5 sm:px-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-orange-600 dark:hover:text-orange-400 shadow-2xs flex items-center gap-2 text-xs font-bold transition-colors cursor-pointer shrink-0"
               title={t('title_settings')}
             >
-              <Cog size={16} />
+              <Cog size={16} className="text-orange-600 shrink-0" />
+              <span className="hidden sm:inline">{t('settings')}</span>
             </button>
           </div>
         </div>
@@ -310,6 +280,7 @@ export const Header: React.FC = () => {
               <NavLink
                 key={item.to}
                 to={item.to}
+                end={item.end}
                 className={({ isActive }) =>
                   `flex flex-col items-center gap-1 px-2.5 py-1.5 rounded-xl text-[10px] font-bold transition-all select-none ${isActive
                     ? 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/60'
@@ -325,18 +296,11 @@ export const Header: React.FC = () => {
         </div>
       </header>
 
-      <BackupModal
-        isOpen={isBackupOpen}
-        onClose={() => setIsBackupOpen(false)}
-        onDataImported={reloadAllStores}
-      />
       <SettingsModal
         isOpen={isSettingsOpen}
-        onClose={() => {
-          setIsSettingsOpen(false);
-          setSettingsSection('general');
-        }}
+        onClose={closeSettings}
         initialSection={settingsSection}
+        onDataImported={reloadAllStores}
       />
     </>
   );

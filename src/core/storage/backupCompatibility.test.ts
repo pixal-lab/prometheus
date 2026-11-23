@@ -1,4 +1,26 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { BackupService } from './backupService';
+import { storage } from './dexieStorage';
+
+const storageMap = new Map<string, string>();
+const mockLocalStorage = {
+  getItem: (key: string) => storageMap.get(key) ?? null,
+  setItem: (key: string, value: string) => storageMap.set(key, String(value)),
+  removeItem: (key: string) => storageMap.delete(key),
+  clear: () => storageMap.clear(),
+  get length() {
+    return storageMap.size;
+  },
+  key: (index: number) => Array.from(storageMap.keys())[index] ?? null,
+};
+
+if (typeof globalThis.localStorage === 'undefined') {
+  Object.defineProperty(globalThis, 'localStorage', {
+    value: mockLocalStorage,
+    writable: true,
+    configurable: true,
+  });
+}
 
 describe('Backup Data Compatibility Tests', () => {
   it('correctly parses legacy Prometheus MVP backup structure', () => {
@@ -112,6 +134,52 @@ describe('Backup Data Compatibility Tests', () => {
     expect(daysMap['Lunes']).toBe('monday');
     expect(daysMap['Miércoles']).toBe('wednesday');
     expect(daysMap['Viernes']).toBe('friday');
+  });
+
+  it('handles invalid, null, or non-object jsonString safely in BackupService.importBackup', async () => {
+    const resNull = await BackupService.importBackup('null');
+    expect(resNull.success).toBe(false);
+
+    const resArray = await BackupService.importBackup('[]');
+    expect(resArray.success).toBe(false);
+
+    const resNum = await BackupService.importBackup('12345');
+    expect(resNum.success).toBe(false);
+
+    const resMalformed = await BackupService.importBackup('{ broken json');
+    expect(resMalformed.success).toBe(false);
+  });
+
+  it('successfully imports a complete backup structure through BackupService.importBackup', async () => {
+    const backupData = {
+      version: '3.0.0-react',
+      timestamp: new Date().toISOString(),
+      classBlocks: [
+        { id: 'cb-1', subject: 'Matemáticas', topic: 'Álgebra', date: '2026-04-10' },
+      ],
+      subjects: {
+        Matemáticas: { color: '#1abc9c', visible: true },
+      },
+      timetableData: {
+        monday: { startMinutes: 480, endMinutes: 1020, events: [] },
+      },
+    };
+
+    const result = await BackupService.importBackup(JSON.stringify(backupData));
+    expect(result.success).toBe(true);
+    expect(result.count).toBe(1);
+
+    const storedBlocks = await storage.getItem<any[]>('classBlocks');
+    expect(storedBlocks).toBeDefined();
+    expect(storedBlocks?.[0].topic).toBe('Álgebra');
+  });
+
+  it('storage.clear removes mirrored keys from localStorage as well', async () => {
+    await storage.setItem('testKey', { hello: 'world' });
+    expect(localStorage.getItem('prometheus_testKey')).toBeDefined();
+
+    await storage.clear();
+    expect(localStorage.getItem('prometheus_testKey')).toBeNull();
   });
 });
 

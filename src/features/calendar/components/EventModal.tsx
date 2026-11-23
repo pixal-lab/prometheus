@@ -245,6 +245,7 @@ export const EventModal: React.FC<EventModalProps> = ({
               label={t('event_course')}
               value={subject}
               onChange={e => handleSubjectChange(e.target.value)}
+              icon={<BookOpen size={14} className="text-orange-500" />}
               options={subjectNames.map(s => ({ value: s, label: s }))}
               required
             />
@@ -258,7 +259,7 @@ export const EventModal: React.FC<EventModalProps> = ({
                   type="color"
                   value={color}
                   onChange={e => setColor(e.target.value)}
-                  className="w-10 h-9 p-0.5 rounded-lg border border-slate-300 dark:border-slate-700 cursor-pointer bg-white dark:bg-slate-900"
+                  className="w-10 h-9 p-0.5 rounded-xl border border-slate-300 dark:border-slate-700 cursor-pointer bg-white dark:bg-slate-900 shadow-2xs hover:border-orange-400 transition-all"
                 />
                 <span className="text-xs font-mono text-slate-500">{color}</span>
               </div>
@@ -276,6 +277,7 @@ export const EventModal: React.FC<EventModalProps> = ({
           <Input
             label={t('event_date')}
             type="date"
+            icon={<Calendar size={14} className="text-orange-500" />}
             value={date}
             onChange={e => setDate(e.target.value)}
             required
@@ -398,6 +400,7 @@ export const EventModal: React.FC<EventModalProps> = ({
                     label={t('frequency')}
                     value={recurrenceRule.type}
                     onChange={e => setRecurrenceRule({ ...recurrenceRule, type: e.target.value as any })}
+                    icon={<RefreshCw size={14} className="text-orange-500" />}
                     options={[
                       { value: 'daily', label: t('daily') },
                       { value: 'weekly', label: t('weekly') },
@@ -410,6 +413,7 @@ export const EventModal: React.FC<EventModalProps> = ({
                     label={t('ends')}
                     value={recurrenceRule.ends}
                     onChange={e => setRecurrenceRule({ ...recurrenceRule, ends: e.target.value as any })}
+                    icon={<Calendar size={14} className="text-orange-500" />}
                     options={[
                       { value: 'afterOccurrences', label: t('after_occurrences') },
                       { value: 'onDate', label: t('on_date') },
@@ -422,7 +426,7 @@ export const EventModal: React.FC<EventModalProps> = ({
                 {recurrenceRule.type === 'weekly' && (
                   <div className="flex flex-col gap-1.5">
                     <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">{t('repeat_on')}</span>
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-1.5 flex-wrap">
                       {WEEKDAYS_RECURRENCE.map(wd => {
                         const isSelected = (recurrenceRule.days || []).includes(wd.day);
                         return (
@@ -430,10 +434,10 @@ export const EventModal: React.FC<EventModalProps> = ({
                             key={wd.day}
                             type="button"
                             onClick={() => handleToggleRecurrenceDay(wd.day)}
-                            className={`w-7 h-7 rounded-lg text-xs font-bold transition-colors ${
+                            className={`h-8 min-w-[34px] px-2.5 rounded-xl text-xs font-extrabold transition-all duration-150 flex items-center justify-center cursor-pointer select-none active:scale-95 ${
                               isSelected
-                                ? 'bg-orange-600 text-white'
-                                : 'bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300'
+                                ? 'bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-sm ring-2 ring-orange-500/30 font-black'
+                                : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-orange-400 dark:hover:border-orange-500/50 hover:text-orange-600 dark:hover:text-orange-400 shadow-2xs'
                             }`}
                           >
                             {wd.label}
@@ -456,7 +460,7 @@ export const EventModal: React.FC<EventModalProps> = ({
                       onChange={e =>
                         setRecurrenceRule({ ...recurrenceRule, occurrences: parseInt(e.target.value) || 1 })
                       }
-                      className="w-20 px-2 py-1 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 font-mono"
+                      className="w-20 px-3 py-1.5 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-mono font-bold shadow-2xs focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500"
                     />
                     <span className="text-xs text-slate-500">{t('classes_unit')}</span>
                   </div>
@@ -469,7 +473,7 @@ export const EventModal: React.FC<EventModalProps> = ({
                       type="date"
                       value={recurrenceRule.endDate || ''}
                       onChange={e => setRecurrenceRule({ ...recurrenceRule, endDate: e.target.value })}
-                      className="px-2 py-1 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900"
+                      className="px-3 py-1.5 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-2xs focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 cursor-pointer"
                     />
                   </div>
                 )}

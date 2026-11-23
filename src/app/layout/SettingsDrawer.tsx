@@ -1,7 +1,13 @@
 import React from 'react';
 import { SettingsModal, SettingsTab } from './SettingsModal';
 
-interface SettingsDrawerProps {
+/**
+ * SettingsDrawer
+ * 
+ * Alias retrocompatible para SettingsModal que preserva la interfaz
+ * histórica utilizada en pruebas unitarias y extensiones.
+ */
+export interface SettingsDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   initialSection?: SettingsTab;

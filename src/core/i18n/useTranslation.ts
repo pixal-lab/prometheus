@@ -21,12 +21,18 @@ const getInitialLanguage = (): Language => {
 
 const initialLang = getInitialLanguage();
 dayjs.locale(initialLang);
+if (typeof document !== 'undefined') {
+  document.documentElement.lang = initialLang;
+}
 
 export const useTranslation = create<I18nStore>((set, get) => ({
   language: initialLang,
   setLanguage: (lang: Language) => {
     if (typeof localStorage !== 'undefined') {
       localStorage.setItem('prometheus-lite-lang', lang);
+    }
+    if (typeof document !== 'undefined') {
+      document.documentElement.lang = lang;
     }
     dayjs.locale(lang);
     set({ language: lang });

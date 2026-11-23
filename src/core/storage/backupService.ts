@@ -69,6 +69,13 @@ export class BackupService {
   static async importBackup(jsonString: string): Promise<{ success: boolean; message: string; count: number }> {
     try {
       const parsed = JSON.parse(jsonString);
+      if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+        return {
+          success: false,
+          message: 'El archivo JSON no contiene una estructura de objeto válida.',
+          count: 0,
+        };
+      }
       let count = 0;
 
       // 1. Bloques de clase

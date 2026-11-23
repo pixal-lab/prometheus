@@ -22,6 +22,7 @@ export const db = new PrometheusDexieDB();
 
 export class DexieStorageAdapter implements IStorageAdapter {
   private isInitialized = false;
+  private memoryFallback = new Map<string, any>();
 
   async init(): Promise<void> {
     if (this.isInitialized) return;
@@ -44,40 +45,62 @@ export class DexieStorageAdapter implements IStorageAdapter {
    */
   private async migrateLegacyLocalForage(): Promise<void> {
     if (typeof indexedDB === 'undefined') return;
-    try {
-      const dbs = await indexedDB.databases?.();
-      const hasLegacy = dbs?.some(d => d.name === 'localforage');
-      if (!hasLegacy) return;
+    return new Promise<void>(async resolve => {
+      try {
+        const dbs = await indexedDB.databases?.();
+        const hasLegacy = dbs?.some(d => d.name === 'localforage');
+        if (!hasLegacy) {
+          resolve();
+          return;
+        }
 
-      const count = await db.store.count();
-      if (count > 0) return; // Ya hay datos en la nueva base
+        const count = await db.store.count();
+        if (count > 0) {
+          resolve();
+          return; // Ya hay datos en la nueva base
+        }
 
-      logger.info('Storage', 'Detectada base de datos previa de localforage. Iniciando migración automática...');
+        logger.info('Storage', 'Detectada base de datos previa de localforage. Iniciando migración automática...');
 
-      const req = indexedDB.open('localforage');
-      req.onsuccess = () => {
-        const legacyDb = req.result;
-        if (!legacyDb.objectStoreNames.contains('keyvaluepairs')) return;
+        const req = indexedDB.open('localforage');
+        req.onerror = () => resolve();
+        req.onsuccess = () => {
+          const legacyDb = req.result;
+          if (!legacyDb.objectStoreNames.contains('keyvaluepairs')) {
+            resolve();
+            return;
+          }
 
-        const tx = legacyDb.transaction('keyvaluepairs', 'readonly');
-        const store = tx.objectStore('keyvaluepairs');
-        const getAllKeys = store.getAllKeys();
-        const getAllVals = store.getAll();
+          const tx = legacyDb.transaction('keyvaluepairs', 'readonly');
+          const store = tx.objectStore('keyvaluepairs');
+          const getAllKeys = store.getAllKeys();
+          const getAllVals = store.getAll();
 
-        getAllKeys.onsuccess = async () => {
-          const keys = getAllKeys.result as string[];
-          getAllVals.onsuccess = async () => {
-            const vals = getAllVals.result;
-            for (let i = 0; i < keys.length; i++) {
-              await this.setItem(keys[i], vals[i]);
-            }
-            logger.info('Storage', `Migrados ${keys.length} registros desde localforage.`);
+          getAllKeys.onerror = () => resolve();
+          getAllVals.onerror = () => resolve();
+
+          getAllKeys.onsuccess = () => {
+            const keys = getAllKeys.result as string[];
+            getAllVals.onsuccess = async () => {
+              const vals = getAllVals.result;
+              try {
+                for (let i = 0; i < keys.length; i++) {
+                  await this.setItem(keys[i], vals[i]);
+                }
+                logger.info('Storage', `Migrados ${keys.length} registros desde localforage.`);
+              } catch (e) {
+                logger.warn('Storage', 'Error durante copia de registros de localforage', e);
+              } finally {
+                resolve();
+              }
+            };
           };
         };
-      };
-    } catch (err) {
-      logger.warn('Storage', 'No se pudo migrar automáticamente localforage', err);
-    }
+      } catch (err) {
+        logger.warn('Storage', 'No se pudo migrar automáticamente localforage', err);
+        resolve();
+      }
+    });
   }
 
   async getItem<T>(key: string, defaultValue?: T): Promise<T | null> {
@@ -91,13 +114,20 @@ export class DexieStorageAdapter implements IStorageAdapter {
       }
 
       // Fallback a localStorage
-      const localVal = localStorage.getItem(`prometheus_${key}`) || localStorage.getItem(key);
-      if (localVal !== null) {
-        try {
-          return JSON.parse(localVal) as T;
-        } catch {
-          return localVal as unknown as T;
+      if (typeof localStorage !== 'undefined') {
+        const localVal = localStorage.getItem(`prometheus_${key}`) || localStorage.getItem(key);
+        if (localVal !== null) {
+          try {
+            return JSON.parse(localVal) as T;
+          } catch {
+            return localVal as unknown as T;
+          }
         }
+      }
+
+      // Fallback a memoria en entornos sin IndexedDB ni localStorage
+      if (this.memoryFallback.has(key)) {
+        return this.memoryFallback.get(key) as T;
       }
 
       return defaultValue !== undefined ? defaultValue : null;
@@ -110,14 +140,18 @@ export class DexieStorageAdapter implements IStorageAdapter {
   async setItem<T>(key: string, value: T): Promise<boolean> {
     try {
       await this.init();
+      this.memoryFallback.set(key, value);
+
       if (typeof indexedDB !== 'undefined' && db.isOpen()) {
         await db.store.put({ key, value });
       }
       // Guardar espejo en localStorage para redundancia
-      try {
-        localStorage.setItem(`prometheus_${key}`, JSON.stringify(value));
-      } catch {
-        // Ignorar límites de 5MB en localStorage
+      if (typeof localStorage !== 'undefined') {
+        try {
+          localStorage.setItem(`prometheus_${key}`, JSON.stringify(value));
+        } catch {
+          // Ignorar límites de 5MB en localStorage
+        }
       }
       return true;
     } catch (err) {
@@ -129,11 +163,15 @@ export class DexieStorageAdapter implements IStorageAdapter {
   async removeItem(key: string): Promise<boolean> {
     try {
       await this.init();
+      this.memoryFallback.delete(key);
+
       if (typeof indexedDB !== 'undefined' && db.isOpen()) {
         await db.store.delete(key);
       }
-      localStorage.removeItem(`prometheus_${key}`);
-      localStorage.removeItem(key);
+      if (typeof localStorage !== 'undefined') {
+        localStorage.removeItem(`prometheus_${key}`);
+        localStorage.removeItem(key);
+      }
       return true;
     } catch (err) {
       logger.error('Storage', `Error al eliminar [${key}]`, err);
@@ -144,8 +182,20 @@ export class DexieStorageAdapter implements IStorageAdapter {
   async clear(): Promise<boolean> {
     try {
       await this.init();
+      this.memoryFallback.clear();
+
       if (typeof indexedDB !== 'undefined' && db.isOpen()) {
         await db.store.clear();
+      }
+      if (typeof localStorage !== 'undefined') {
+        const keysToRemove: string[] = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k && (k.startsWith('prometheus_') || k.startsWith('prometheus-') || k === 'classBlocks' || k === 'subjects' || k === 'timetableData' || k === 'gradebookData' || k === 'lessonPlannerData')) {
+            keysToRemove.push(k);
+          }
+        }
+        keysToRemove.forEach(k => localStorage.removeItem(k));
       }
       return true;
     } catch (err) {

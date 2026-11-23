@@ -29,7 +29,7 @@ interface LessonPlannerState {
   updateLessonContent: (path: string[], title: string, content: LessonPlanContent) => Promise<void>;
   renameNode: (path: string[], newName: string) => Promise<void>;
   deleteNode: (path: string[]) => Promise<void>;
-  saveAsTemplate: (name: string, content: LessonPlanContent) => Promise<void>;
+  saveAsTemplate: (name: string, content: Partial<LessonPlanContent>) => Promise<void>;
 }
 
 const defaultContent: LessonPlanContent = {
@@ -287,8 +287,15 @@ export const useLessonPlannerStore = create<LessonPlannerState>((set, get) => ({
       delete target[oldKey];
       target[newName.trim()] = node;
 
-      if (get().activeLessonPath.join('/') === path.join('/')) {
+      const activePath = get().activeLessonPath;
+      const targetPathStr = path.join('/');
+      const activePathStr = activePath.join('/');
+
+      if (activePathStr === targetPathStr) {
         set({ activeLessonPath: [...path.slice(0, -1), newName.trim()] });
+      } else if (activePathStr.startsWith(targetPathStr + '/')) {
+        const remaining = activePath.slice(path.length);
+        set({ activeLessonPath: [...path.slice(0, -1), newName.trim(), ...remaining] });
       }
     }
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { TimetableData, TimetableEvent, DayOfWeek, TimetableBlockType } from '../../../core/types/timetable.types';
-import { Clock, GripVertical } from 'lucide-react';
+import { Clock, GripVertical, Copy } from 'lucide-react';
 import { useTimetableStore } from '../store/useTimetableStore';
 import { useTranslation } from '../../../core/i18n/useTranslation';
 
@@ -17,6 +17,13 @@ interface TimetableGridProps {
     type: TimetableBlockType
   ) => void;
   onMoveBlock?: (
+    fromDay: DayOfWeek,
+    toDay: DayOfWeek,
+    eventId: string,
+    newStartTime: string,
+    newEndTime: string
+  ) => void;
+  onCopyBlock?: (
     fromDay: DayOfWeek,
     toDay: DayOfWeek,
     eventId: string,
@@ -75,6 +82,7 @@ interface DraggingBlockState {
   initialClientY: number;
   grabOffsetY: number;
   hasMoved: boolean;
+  isCopy: boolean;
 }
 
 export const TimetableGrid: React.FC<TimetableGridProps> = ({
@@ -84,6 +92,7 @@ export const TimetableGrid: React.FC<TimetableGridProps> = ({
   onContextMenu,
   onDropSubject,
   onMoveBlock,
+  onCopyBlock,
   onResizeBlock,
 }) => {
   const { t } = useTranslation();
@@ -99,6 +108,21 @@ export const TimetableGrid: React.FC<TimetableGridProps> = ({
   // Dragging existing timetable block (Pointer / Mouse based)
   const [dragging, setDragging] = useState<DraggingBlockState | null>(null);
   const justDraggedRef = useRef(false);
+  const canceledDragRef = useRef(false);
+
+  // Suppress context menu if a drag operation just finished or was canceled
+  useEffect(() => {
+    const handleWindowContextMenu = (e: MouseEvent) => {
+      if (justDraggedRef.current || canceledDragRef.current) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    };
+    window.addEventListener('contextmenu', handleWindowContextMenu, true);
+    return () => {
+      window.removeEventListener('contextmenu', handleWindowContextMenu, true);
+    };
+  }, []);
 
   // References to track column bounding rects accurately
   const gridRef = useRef<HTMLDivElement>(null);
@@ -180,11 +204,16 @@ export const TimetableGrid: React.FC<TimetableGridProps> = ({
     };
   }, [resizing, endHour, onResizeBlock]);
 
-  // Pointer drag event listeners for moving existing blocks with real-time slot snapping
+  // Pointer drag event listeners for moving / copying existing blocks with real-time slot snapping
   useEffect(() => {
     if (!dragging) return;
 
     const handlePointerMove = (e: PointerEvent) => {
+      if (e.buttons === 0) {
+        handlePointerUp();
+        return;
+      }
+
       const dx = e.clientX - dragging.initialClientX;
       const dy = e.clientY - dragging.initialClientY;
       const dist = Math.sqrt(dx * dx + dy * dy);
@@ -192,7 +221,7 @@ export const TimetableGrid: React.FC<TimetableGridProps> = ({
       const hasMoved = dragging.hasMoved || dist > 4;
       if (!hasMoved) return;
 
-      document.body.style.cursor = 'grabbing';
+      document.body.style.cursor = dragging.isCopy ? 'copy' : 'grabbing';
       document.body.style.userSelect = 'none';
 
       // Auto-scroll window if near edges
@@ -266,9 +295,24 @@ export const TimetableGrid: React.FC<TimetableGridProps> = ({
         justDraggedRef.current = true;
         setTimeout(() => {
           justDraggedRef.current = false;
-        }, 120);
+        }, 200);
 
-        if (
+        if (dragging.isCopy) {
+          if (
+            dragging.fromDay !== dragging.currentDay ||
+            dragging.currentStartMinutes !== dragging.initialStartMinutes
+          ) {
+            const newStartTime = minutesToTime(dragging.currentStartMinutes);
+            const newEndTime = minutesToTime(dragging.currentStartMinutes + dragging.durationMinutes);
+            onCopyBlock?.(
+              dragging.fromDay,
+              dragging.currentDay,
+              dragging.eventId,
+              newStartTime,
+              newEndTime
+            );
+          }
+        } else if (
           dragging.fromDay !== dragging.currentDay ||
           dragging.currentStartMinutes !== dragging.initialStartMinutes
         ) {
@@ -283,9 +327,11 @@ export const TimetableGrid: React.FC<TimetableGridProps> = ({
           );
         }
       } else {
-        const ev = data[dragging.fromDay]?.events.find(e => e.id === dragging.eventId);
-        if (ev) {
-          onBlockClick(dragging.fromDay, ev);
+        if (!dragging.isCopy) {
+          const ev = data[dragging.fromDay]?.events.find(e => e.id === dragging.eventId);
+          if (ev) {
+            onBlockClick(dragging.fromDay, ev);
+          }
         }
       }
 
@@ -296,6 +342,12 @@ export const TimetableGrid: React.FC<TimetableGridProps> = ({
       if (e.key === 'Escape') {
         document.body.style.cursor = '';
         document.body.style.userSelect = '';
+        if (dragging?.hasMoved) {
+          canceledDragRef.current = true;
+          setTimeout(() => {
+            canceledDragRef.current = false;
+          }, 300);
+        }
         setDragging(null);
       }
     };
@@ -313,7 +365,7 @@ export const TimetableGrid: React.FC<TimetableGridProps> = ({
       window.removeEventListener('pointercancel', handlePointerUp);
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [dragging, startHour, endHour, onMoveBlock, onBlockClick, data]);
+  }, [dragging, startHour, endHour, onMoveBlock, onCopyBlock, onBlockClick, data]);
 
   return (
     <div className="flex flex-col bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs overflow-x-auto print:border-none print:shadow-none select-none">
@@ -495,7 +547,7 @@ export const TimetableGrid: React.FC<TimetableGridProps> = ({
 
               {/* Existing Event Blocks */}
               {dayEvents.map(event => {
-                const isCurrentlyMoved = dragging && dragging.eventId === event.id && dragging.hasMoved;
+                const isCurrentlyMoved = dragging && dragging.eventId === event.id && dragging.hasMoved && !dragging.isCopy;
                 const isCurrentResizing = resizing && resizing.eventId === event.id;
                 const startM = timeToMinutes(event.startTime);
                 const endM = isCurrentResizing ? timeToMinutes(resizing.currentEndTime) : timeToMinutes(event.endTime);
@@ -534,8 +586,9 @@ export const TimetableGrid: React.FC<TimetableGridProps> = ({
                   <div
                     key={event.id}
                     onPointerDown={e => {
-                      if (e.button !== 0) return;
+                      if (e.button !== 0 && e.button !== 2) return;
                       if (resizing) return;
+                      const isCopy = e.button === 2;
                       const rect = e.currentTarget.getBoundingClientRect();
                       const grabOffsetY = e.clientY - rect.top;
                       const dur = endM - startM;
@@ -554,6 +607,7 @@ export const TimetableGrid: React.FC<TimetableGridProps> = ({
                         initialClientY: e.clientY,
                         grabOffsetY,
                         hasMoved: false,
+                        isCopy,
                       });
                     }}
                     onClick={() => {
@@ -563,6 +617,7 @@ export const TimetableGrid: React.FC<TimetableGridProps> = ({
                     onContextMenu={e => {
                       e.preventDefault();
                       e.stopPropagation();
+                      if (justDraggedRef.current || canceledDragRef.current) return;
                       onContextMenu?.(e, day.key, event);
                     }}
                     className={`absolute left-1.5 right-1.5 rounded-xl p-2 shadow-xs cursor-grab active:cursor-grabbing hover:shadow-md hover:scale-[1.01] transition-transform overflow-hidden flex flex-col justify-between group z-10 touch-none select-none ${
@@ -573,7 +628,7 @@ export const TimetableGrid: React.FC<TimetableGridProps> = ({
                       height: `${heightPx}px`,
                       backgroundColor: event.color || '#3b82f6',
                     }}
-                    title={`${event.title} (${event.startTime} - ${isCurrentResizing ? resizing.currentEndTime : event.endTime}) - Haz clic y arrastra para reubicar`}
+                    title={`${event.title} (${event.startTime} - ${isCurrentResizing ? resizing.currentEndTime : event.endTime}) - Arrastra con clic izquierdo para mover o clic derecho para duplicar`}
                   >
                     <div className="flex items-start justify-between gap-1">
                       <div className="flex flex-col min-w-0">
@@ -643,7 +698,7 @@ export const TimetableGrid: React.FC<TimetableGridProps> = ({
                 // Conflict check
                 const hasConflict = dayEvents.some(
                   e =>
-                    e.id !== dragging.eventId &&
+                    (!dragging.isCopy ? e.id !== dragging.eventId : true) &&
                     Math.max(dragging.currentStartMinutes, timeToMinutes(e.startTime)) <
                       Math.min(dragging.currentStartMinutes + dragging.durationMinutes, timeToMinutes(e.endTime))
                 );
@@ -653,6 +708,8 @@ export const TimetableGrid: React.FC<TimetableGridProps> = ({
                     className={`absolute left-1 right-1 rounded-xl p-2.5 shadow-2xl z-30 pointer-events-none select-none flex flex-col justify-between overflow-hidden transition-all duration-75 ease-out ring-2 ${
                       hasConflict
                         ? 'ring-amber-500 bg-amber-600/90'
+                        : dragging.isCopy
+                        ? 'ring-blue-500 border-2 border-dashed border-white'
                         : 'ring-orange-500'
                     } ${isDark ? 'text-white' : 'text-slate-900'}`}
                     style={{
@@ -663,8 +720,9 @@ export const TimetableGrid: React.FC<TimetableGridProps> = ({
                   >
                     <div className="flex items-start justify-between gap-1">
                       <div className="flex flex-col min-w-0">
-                        <span className="font-extrabold text-xs leading-tight truncate drop-shadow-xs">
-                          {dragging.title}
+                        <span className="font-extrabold text-xs leading-tight truncate drop-shadow-xs flex items-center gap-1">
+                          {dragging.isCopy && <Copy size={12} className="shrink-0" />}
+                          <span>{dragging.title}</span>
                         </span>
                         <span className="text-[10px] opacity-95 font-mono font-bold mt-0.5 bg-black/25 dark:bg-black/45 px-1.5 py-0.5 rounded w-fit">
                           {previewStartTime} - {previewEndTime}
@@ -677,6 +735,10 @@ export const TimetableGrid: React.FC<TimetableGridProps> = ({
                       ) : (dragging.currentStartMinutes + dragging.durationMinutes) > dayEnd ? (
                         <span className="text-[9px] font-bold bg-amber-600 text-amber-100 px-1.5 py-0.5 rounded-full shadow-xs shrink-0">
                           Extensión jornada
+                        </span>
+                      ) : dragging.isCopy ? (
+                        <span className="text-[9px] font-bold bg-blue-600 text-white px-1.5 py-0.5 rounded-full shadow-xs shrink-0 animate-pulse flex items-center gap-1">
+                          <Copy size={9} /> Copiar aquí
                         </span>
                       ) : (
                         <span className="text-[9px] font-bold bg-orange-500 text-white px-1.5 py-0.5 rounded-full shadow-xs shrink-0 animate-pulse">

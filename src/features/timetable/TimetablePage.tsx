@@ -38,6 +38,7 @@ export const TimetablePage: React.FC = () => {
     updateEvent,
     deleteEvent,
     duplicateEvent,
+    copyEvent,
     moveEvent,
     clearTimetable,
     undo,
@@ -415,6 +416,19 @@ export const TimetablePage: React.FC = () => {
             onDropSubject={handleDropSubject}
             onMoveBlock={async (fromDay, toDay, eventId, newStartTime, newEndTime) => {
               await moveEvent(fromDay, toDay, eventId, newStartTime, newEndTime);
+            }}
+            onCopyBlock={async (fromDay, toDay, eventId, newStartTime, newEndTime) => {
+              await copyEvent(fromDay, toDay, eventId, newStartTime, newEndTime);
+              if (!useTimetableStore.getState().conflictState) {
+                const dayEnd = data[toDay]?.endMinutes ?? 1020;
+                const [h, m] = newEndTime.split(':').map(Number);
+                const endMinutes = h * 60 + m;
+                if (endMinutes > dayEnd) {
+                  showToast(`Bloque copiado (extiende la jornada hasta las ${newEndTime})`, 'warning');
+                } else {
+                  showToast('Bloque duplicado con éxito', 'success');
+                }
+              }
             }}
             onResizeBlock={async (day, eventId, newEndTime) => {
               await updateEvent(day, eventId, { endTime: newEndTime });
