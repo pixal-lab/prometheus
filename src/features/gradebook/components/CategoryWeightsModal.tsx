@@ -25,6 +25,10 @@ export const CategoryWeightsModal: React.FC<CategoryWeightsModalProps> = ({
 
   const [categories, setCategories] = useState<CategoryWeight[]>(course.categories || []);
 
+  React.useEffect(() => {
+    setCategories(course.categories || []);
+  }, [course, isOpen]);
+
   const totalWeight = categories.reduce((sum, c) => sum + (Number(c.weight) || 0), 0);
 
   const handleAdd = () => {

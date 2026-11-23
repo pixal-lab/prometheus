@@ -6,6 +6,8 @@ import { Select } from '../../../components/ui/Select';
 import { ClassBlock, RecurrenceRule } from '../../../core/types/calendar.types';
 import { useCalendarStore } from '../store/useCalendarStore';
 import { useTranslation } from '../../../core/i18n/useTranslation';
+import { useDialog } from '../../../components/ui/Dialog';
+import { useToast } from '../../../components/ui/Toast';
 import { Trash2, Copy, Calendar, Award, RefreshCw, BookOpen, X, ChevronDown, ChevronUp } from 'lucide-react';
 import { LessonPlanPickerModal } from './LessonPlanPickerModal';
 
@@ -32,6 +34,8 @@ export const EventModal: React.FC<EventModalProps> = ({
 }) => {
   const { t } = useTranslation();
   const { subjects, addBlock, updateBlock, deleteBlock, duplicateBlock } = useCalendarStore();
+  const { confirm } = useDialog();
+  const { showToast } = useToast();
 
   const [subject, setSubject] = useState('');
   const [topic, setTopic] = useState('');
@@ -163,13 +167,29 @@ export const EventModal: React.FC<EventModalProps> = ({
     if (!event) return;
     if (isRecurringInstance) {
       const baseId = event.id.replace(/-rec-\d+$/, '');
-      if (confirm('Esta clase forma parte de una repetición. ¿Deseas eliminar la serie completa?')) {
+      const confirmed = await confirm({
+        title: 'Eliminar Serie Recurrente',
+        message: 'Esta clase forma parte de una repetición. ¿Deseas eliminar la serie completa de clases?',
+        confirmText: 'Eliminar Serie',
+        variant: 'danger',
+        icon: 'trash',
+      });
+      if (confirmed) {
         await deleteBlock(baseId);
+        showToast('Serie de clases eliminada', 'info');
         onClose();
       }
     } else {
-      if (confirm(`¿Eliminar la clase de "${topic}"?`)) {
+      const confirmed = await confirm({
+        title: 'Eliminar Clase',
+        message: `¿Deseas eliminar la clase de "${topic || event.subject}"?`,
+        confirmText: 'Eliminar',
+        variant: 'danger',
+        icon: 'trash',
+      });
+      if (confirmed) {
         await deleteBlock(event.id);
+        showToast('Clase eliminada', 'info');
         onClose();
       }
     }

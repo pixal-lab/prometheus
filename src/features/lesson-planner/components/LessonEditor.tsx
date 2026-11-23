@@ -4,6 +4,7 @@ import { useLessonPlannerStore } from '../store/useLessonPlannerStore';
 import { Button } from '../../../components/ui/Button';
 import { Input } from '../../../components/ui/Input';
 import { useToast } from '../../../components/ui/Toast';
+import { useDialog } from '../../../components/ui/Dialog';
 import { exportLessonToDocx } from '../services/docxExporter';
 import { exportLessonToPdf, exportLessonToTxt } from '../services/pdfExporter';
 import { FileDown, FileText, Bookmark, Save, Trash2 } from 'lucide-react';
@@ -17,6 +18,7 @@ interface LessonEditorProps {
 export const LessonEditor: React.FC<LessonEditorProps> = ({ lesson, path }) => {
   const { t } = useTranslation();
   const { showToast } = useToast();
+  const { prompt, confirm } = useDialog();
   const { updateLessonContent, deleteNode, saveAsTemplate, templates } = useLessonPlannerStore();
 
   const [title, setTitle] = useState(lesson.title);
@@ -49,7 +51,14 @@ export const LessonEditor: React.FC<LessonEditorProps> = ({ lesson, path }) => {
   };
 
   const handleSaveTemplate = async () => {
-    const name = prompt('Nombre para esta nueva plantilla:', title);
+    const name = await prompt({
+      title: 'Guardar como Plantilla',
+      message: 'Ingresa un nombre descriptivo para guardar esta lección como plantilla:',
+      defaultValue: title,
+      placeholder: 'Ej: Plantilla de Clase DUA',
+      confirmText: 'Guardar Plantilla',
+      icon: 'template',
+    });
     if (name?.trim()) {
       await saveAsTemplate(name.trim(), content);
       showToast('Plantilla guardada exitosamente', 'success');
@@ -57,7 +66,14 @@ export const LessonEditor: React.FC<LessonEditorProps> = ({ lesson, path }) => {
   };
 
   const handleDelete = async () => {
-    if (confirm(`¿Eliminar la lección "${title}"?`)) {
+    const confirmed = await confirm({
+      title: 'Eliminar Lección',
+      message: `¿Estás seguro de que deseas eliminar la lección "${title}"? Esta acción no se puede deshacer.`,
+      confirmText: 'Eliminar',
+      variant: 'danger',
+      icon: 'trash',
+    });
+    if (confirmed) {
       await deleteNode(path);
       showToast('Lección eliminada', 'info');
     }

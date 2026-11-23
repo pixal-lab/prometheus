@@ -31,6 +31,25 @@ describe('Backup Data Compatibility Tests', () => {
     expect(parsed.subjects['Matemáticas'].color).toBe('#1abc9c');
   });
 
+  it('correctly includes and restores lessonTemplates in backup', () => {
+    const backupWithTemplates = JSON.stringify({
+      version: '3.0.0-react',
+      timestamp: '2026-11-22T00:00:00.000Z',
+      lessonTemplates: [
+        {
+          id: 'tpl-1',
+          name: 'Plantilla DUA Estándar',
+          content: { objectives: 'DUA Obj', readings: 'Lecturas' },
+        },
+      ],
+    });
+
+    const parsed = JSON.parse(backupWithTemplates);
+    expect(parsed.lessonTemplates).toBeDefined();
+    expect(parsed.lessonTemplates.length).toBe(1);
+    expect(parsed.lessonTemplates[0].name).toBe('Plantilla DUA Estándar');
+  });
+
   it('correctly parses full suite backup structure', () => {
     const fullBackup = JSON.stringify({
       version: '3.0.0-react',

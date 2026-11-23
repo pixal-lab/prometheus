@@ -24,6 +24,7 @@ import { ClassBlock } from '../../core/types/calendar.types';
 import { expandRecurringEvents } from './utils/recurrenceEngine';
 import { CalendarExportService } from './services/calendarExportService';
 import { useToast } from '../../components/ui/Toast';
+import { useDialog } from '../../components/ui/Dialog';
 import {
   ChevronLeft,
   ChevronRight,
@@ -46,6 +47,7 @@ dayjs.locale('es');
 export const CalendarPage: React.FC = () => {
   const { t } = useTranslation();
   const { showToast } = useToast();
+  const { confirm } = useDialog();
   const {
     classBlocks,
     subjects,
@@ -227,7 +229,21 @@ export const CalendarPage: React.FC = () => {
 
     // Check if there is already a block on targetDate
     const hasConflict = classBlocks.some(b => b.date === targetDate && b.id !== blockId);
-    const daysDiff = dayjs(targetDate).diff(dayjs(block.date), 'day');
+    
+    // Calculate difference in school weekdays (Mon-Fri) for accurate cascade shifting
+    let weekdaysCount = 0;
+    const startD = dayjs(block.date);
+    const endD = dayjs(targetDate);
+    if (!startD.isSame(endD, 'day')) {
+      const step = endD.isAfter(startD) ? 1 : -1;
+      let cur = startD;
+      while (!cur.isSame(endD, 'day')) {
+        cur = cur.add(step, 'day');
+        if (cur.isoWeekday() <= 5) {
+          weekdaysCount += step;
+        }
+      }
+    }
 
     if (hasConflict) {
       setConflictModal({
@@ -235,7 +251,7 @@ export const CalendarPage: React.FC = () => {
         blockId,
         topic: block.topic,
         targetDate,
-        daysDiff,
+        daysDiff: weekdaysCount,
       });
     } else {
       await moveBlock(blockId, targetDate);
@@ -560,13 +576,29 @@ export const CalendarPage: React.FC = () => {
             const isRecurringInstance = event.id.includes('-rec-');
             const baseId = isRecurringInstance ? event.id.replace(/-rec-\d+$/, '') : event.id;
             if (isRecurringInstance) {
-              if (confirm('Esta clase forma parte de una repetición. ¿Deseas eliminar la serie completa?')) {
+              const confirmed = await confirm({
+                title: 'Eliminar Serie Recurrente',
+                message: 'Esta clase forma parte de una repetición. ¿Deseas eliminar la serie completa?',
+                confirmText: 'Eliminar Serie',
+                variant: 'danger',
+                icon: 'trash',
+              });
+              if (confirmed) {
                 await deleteBlock(baseId);
                 showToast('Serie de clases eliminada', 'info');
               }
             } else {
-              await deleteBlock(event.id);
-              showToast('Clase eliminada', 'info');
+              const confirmed = await confirm({
+                title: 'Eliminar Clase',
+                message: `¿Deseas eliminar la clase "${event.topic || event.subject}"?`,
+                confirmText: 'Eliminar',
+                variant: 'danger',
+                icon: 'trash',
+              });
+              if (confirmed) {
+                await deleteBlock(event.id);
+                showToast('Clase eliminada', 'info');
+              }
             }
             setContextMenu(null);
           }}

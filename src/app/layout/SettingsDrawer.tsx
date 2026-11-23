@@ -3,6 +3,7 @@ import { useCalendarStore } from '../../features/calendar/store/useCalendarStore
 import { useTranslation } from '../../core/i18n/useTranslation';
 import { useTheme } from '../../core/theme/useTheme';
 import { useToast } from '../../components/ui/Toast';
+import { useDialog } from '../../components/ui/Dialog';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import {
@@ -44,6 +45,7 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
   const { t, language, setLanguage } = useTranslation();
   const { theme, toggleTheme } = useTheme();
   const { showToast } = useToast();
+  const { confirm } = useDialog();
 
   const {
     schoolYears,
@@ -101,7 +103,13 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
       showToast('No puedes eliminar el único año escolar', 'warning');
       return;
     }
-    if (confirm(`¿Estás seguro de eliminar el "${name}"?`)) {
+    const confirmed = await confirm({
+      title: 'Eliminar Año Escolar',
+      message: `¿Estás seguro de que deseas eliminar el "${name}"? Se perderán las configuraciones asociadas a este año.`,
+      confirmText: 'Eliminar',
+      variant: 'danger',
+    });
+    if (confirmed) {
       await deleteSchoolYear(id);
       showToast('Año escolar eliminado', 'info');
     }
@@ -381,8 +389,17 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
                             {conf.visible ? <Eye size={14} /> : <EyeOff size={14} />}
                           </button>
                           <button
-                            onClick={() => {
-                              if (confirm(`¿Eliminar curso "${name}"?`)) deleteSubject(name);
+                            onClick={async () => {
+                              const confirmed = await confirm({
+                                title: 'Eliminar Curso / Asignatura',
+                                message: `¿Estás seguro de que deseas eliminar el curso "${name}"?`,
+                                confirmText: 'Eliminar',
+                                variant: 'danger',
+                              });
+                              if (confirmed) {
+                                deleteSubject(name);
+                                showToast('Curso eliminado', 'info');
+                              }
                             }}
                             className="p-1 text-slate-400 hover:text-rose-600"
                             title="Eliminar curso"

@@ -2,6 +2,7 @@ import React from 'react';
 import { Outlet } from 'react-router-dom';
 import { Header } from './Header';
 import { ToastContainer } from '../../components/ui/Toast';
+import { DialogContainer } from '../../components/ui/Dialog';
 
 export const AppLayout: React.FC = () => {
   return (
@@ -11,6 +12,7 @@ export const AppLayout: React.FC = () => {
         <Outlet />
       </main>
       <ToastContainer />
+      <DialogContainer />
     </div>
   );
 };

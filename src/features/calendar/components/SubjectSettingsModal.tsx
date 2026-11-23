@@ -4,6 +4,8 @@ import { Button } from '../../../components/ui/Button';
 import { useCalendarStore } from '../store/useCalendarStore';
 import { Plus, Trash2, Eye, EyeOff } from 'lucide-react';
 import { useTranslation } from '../../../core/i18n/useTranslation';
+import { useDialog } from '../../../components/ui/Dialog';
+import { useToast } from '../../../components/ui/Toast';
 
 interface SubjectSettingsModalProps {
   isOpen: boolean;
@@ -21,6 +23,8 @@ const WEEKDAY_KEYS = [
 export const SubjectSettingsModal: React.FC<SubjectSettingsModalProps> = ({ isOpen, onClose }) => {
   const { t } = useTranslation();
   const { subjects, setSubject, deleteSubject } = useCalendarStore();
+  const { confirm } = useDialog();
+  const { showToast } = useToast();
 
   const [newSubjectName, setNewSubjectName] = useState('');
   const [newSubjectColor, setNewSubjectColor] = useState('#3498db');
@@ -180,9 +184,17 @@ export const SubjectSettingsModal: React.FC<SubjectSettingsModalProps> = ({ isOp
                   </button>
                   <button
                     type="button"
-                    onClick={() => {
-                      if (confirm(`¿Eliminar la asignatura "${name}"?`)) {
+                    onClick={async () => {
+                      const confirmed = await confirm({
+                        title: 'Eliminar Asignatura',
+                        message: `¿Deseas eliminar la asignatura "${name}"? Se perderá su configuración de color y visibilidad.`,
+                        confirmText: 'Eliminar',
+                        variant: 'danger',
+                        icon: 'trash',
+                      });
+                      if (confirmed) {
                         deleteSubject(name);
+                        showToast(`Asignatura "${name}" eliminada`, 'info');
                       }
                     }}
                     className="p-1.5 text-slate-400 hover:text-rose-600 transition-colors"

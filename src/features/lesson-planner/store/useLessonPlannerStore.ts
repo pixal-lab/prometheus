@@ -238,6 +238,7 @@ export const useLessonPlannerStore = create<LessonPlannerState>((set, get) => ({
   },
 
   updateLessonContent: async (path, title, content) => {
+    if (path.length === 0) return;
     const data = JSON.parse(JSON.stringify(get().data)) as LessonPlannerData;
     let current: any = data;
 
@@ -310,7 +311,9 @@ export const useLessonPlannerStore = create<LessonPlannerState>((set, get) => ({
     const target = path.length === 1 ? data : current.children;
     delete target[oldKey];
 
-    if (get().activeLessonPath.join('/').startsWith(path.join('/'))) {
+    const activeStr = get().activeLessonPath.join('/');
+    const deletedStr = path.join('/');
+    if (activeStr === deletedStr || activeStr.startsWith(deletedStr + '/')) {
       set({ activeLessonId: null, activeLessonPath: [] });
     }
 

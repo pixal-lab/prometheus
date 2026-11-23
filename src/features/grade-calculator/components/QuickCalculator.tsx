@@ -6,10 +6,17 @@ export const QuickCalculator: React.FC = () => {
   const [firstOperand, setFirstOperand] = useState<number | null>(null);
   const [operator, setOperator] = useState<string | null>(null);
   const [waitingForSecond, setWaitingForSecond] = useState(false);
+  const [justEvaluated, setJustEvaluated] = useState(false);
 
   const handleNumber = (digit: string) => {
+    if (justEvaluated) {
+      setDisplay(digit === '.' ? '0.' : digit);
+      setJustEvaluated(false);
+      setWaitingForSecond(false);
+      return;
+    }
     if (waitingForSecond) {
-      setDisplay(digit);
+      setDisplay(digit === '.' ? '0.' : digit);
       setWaitingForSecond(false);
     } else {
       if (digit === '.' && display.includes('.')) return;
@@ -18,6 +25,7 @@ export const QuickCalculator: React.FC = () => {
   };
 
   const handleOperator = (nextOp: string) => {
+    setJustEvaluated(false);
     const inputVal = parseFloat(display);
 
     if (operator && waitingForSecond) {
@@ -38,13 +46,15 @@ export const QuickCalculator: React.FC = () => {
   };
 
   const compute = (a: number, b: number, op: string): number => {
+    let res: number;
     switch (op) {
-      case '+': return a + b;
-      case '-': return a - b;
-      case '×': return a * b;
-      case '÷': return b !== 0 ? Math.round((a / b) * 1000) / 1000 : 0;
+      case '+': res = a + b; break;
+      case '-': res = a - b; break;
+      case '×': res = a * b; break;
+      case '÷': res = b !== 0 ? a / b : 0; break;
       default: return b;
     }
+    return Math.round(res * 1000000) / 1000000;
   };
 
   const handleEquals = () => {
@@ -55,6 +65,7 @@ export const QuickCalculator: React.FC = () => {
     setFirstOperand(null);
     setOperator(null);
     setWaitingForSecond(false);
+    setJustEvaluated(true);
   };
 
   const handleClear = () => {
@@ -62,6 +73,7 @@ export const QuickCalculator: React.FC = () => {
     setFirstOperand(null);
     setOperator(null);
     setWaitingForSecond(false);
+    setJustEvaluated(false);
   };
 
   const handleBackspace = () => {

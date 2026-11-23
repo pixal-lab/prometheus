@@ -180,6 +180,8 @@ export const useGradebookStore = create<GradebookStore>((set, get) => ({
     data.students = data.students.filter(s => s.id !== studentId);
     data.grades = data.grades.filter(g => g.studentId !== studentId);
     data.attendance = data.attendance.filter(a => a.studentId !== studentId);
+    data.observations = data.observations.filter(o => o.studentId !== studentId);
+    data.reminders = data.reminders.filter(r => r.studentId !== studentId);
     set({ data });
     await get().saveData();
   },

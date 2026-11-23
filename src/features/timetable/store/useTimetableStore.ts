@@ -8,11 +8,20 @@ import {
 } from '../../../core/types/timetable.types';
 import { logger } from '../../../core/debug/logger';
 
-interface ConflictState {
+export interface ConflictState {
   isOpen: boolean;
   incomingEvent: TimetableEvent;
   targetDay: DayOfWeek;
   conflictingEvent: TimetableEvent;
+  fromDay?: DayOfWeek;
+  originalEvent?: TimetableEvent;
+}
+
+export interface DraggedPaletteItem {
+  title: string;
+  color: string;
+  type: TimetableBlockType;
+  durationMinutes: number;
 }
 
 interface TimetableStore {
@@ -20,6 +29,8 @@ interface TimetableStore {
   nonCourseConfigs: Record<string, string>; // type -> color
   isLoading: boolean;
   conflictState: ConflictState | null;
+  draggedPaletteItem: DraggedPaletteItem | null;
+  setDraggedPaletteItem: (item: DraggedPaletteItem | null) => void;
 
   undoStack: TimetableData[];
   redoStack: TimetableData[];
@@ -89,9 +100,52 @@ function timeToMinutes(t: string): number {
 }
 
 function minutesToTime(m: number): string {
-  const h = Math.floor(m / 60);
-  const min = m % 60;
+  const bounded = Math.max(0, Math.min(1439, m));
+  const h = Math.floor(bounded / 60);
+  const min = bounded % 60;
   return `${String(h).padStart(2, '0')}:${String(min).padStart(2, '0')}`;
+}
+
+export function eliminateOverlaps(events: TimetableEvent[], dayMaxMinutes = 1439): TimetableEvent[] {
+  if (events.length <= 1) return events;
+
+  // Sort by start time. If start times are equal, preserve order
+  const sorted = [...events].sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
+
+  let currentCursor = 0;
+  const result: TimetableEvent[] = [];
+
+  for (const e of sorted) {
+    const startM = timeToMinutes(e.startTime);
+    const endM = timeToMinutes(e.endTime);
+    const dur = Math.max(15, endM - startM);
+
+    let newStart = Math.max(startM, currentCursor);
+    let newEnd = newStart + dur;
+
+    if (newEnd > dayMaxMinutes) {
+      newEnd = dayMaxMinutes;
+      // Guarantee minimum 15 minute duration without going before 0
+      newStart = Math.max(0, newEnd - Math.max(15, Math.min(dur, 15)));
+    }
+    currentCursor = newEnd;
+
+    result.push({
+      ...e,
+      startTime: minutesToTime(newStart),
+      endTime: minutesToTime(newEnd),
+    });
+  }
+
+  return result;
+}
+
+function updateDayBoundaries(data: TimetableData, days: DayOfWeek[]) {
+  const uniqueDays = Array.from(new Set(days.filter(Boolean)));
+  for (const d of uniqueDays) {
+    if (!data[d]) continue;
+    data[d].events = eliminateOverlaps(data[d].events);
+  }
 }
 
 export const useTimetableStore = create<TimetableStore>((set, get) => ({
@@ -99,6 +153,8 @@ export const useTimetableStore = create<TimetableStore>((set, get) => ({
   nonCourseConfigs: defaultNonCourseColors,
   isLoading: true,
   conflictState: null,
+  draggedPaletteItem: null,
+  setDraggedPaletteItem: item => set({ draggedPaletteItem: item }),
   undoStack: [],
   redoStack: [],
 
@@ -213,8 +269,27 @@ export const useTimetableStore = create<TimetableStore>((set, get) => ({
       ...eventData,
     };
 
+    const startM = timeToMinutes(newEvent.startTime);
+    const endM = timeToMinutes(newEvent.endTime);
+    const conflict = data[day].events.find(
+      e => Math.max(startM, timeToMinutes(e.startTime)) < Math.min(endM, timeToMinutes(e.endTime))
+    );
+
+    if (conflict) {
+      set({
+        conflictState: {
+          isOpen: true,
+          incomingEvent: newEvent,
+          targetDay: day,
+          conflictingEvent: conflict,
+        },
+      });
+      return;
+    }
+
     data[day].events.push(newEvent);
     data[day].events.sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
+    updateDayBoundaries(data, [day]);
     set({
       data,
       undoStack: [...get().undoStack.slice(-30), prev],
@@ -230,7 +305,7 @@ export const useTimetableStore = create<TimetableStore>((set, get) => ({
     const idx = dayEvents.findIndex(e => e.id === eventId);
     if (idx !== -1) {
       dayEvents[idx] = { ...dayEvents[idx], ...updates };
-      dayEvents.sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
+      updateDayBoundaries(data, [day]);
       set({
         data,
         undoStack: [...get().undoStack.slice(-30), prev],
@@ -260,17 +335,17 @@ export const useTimetableStore = create<TimetableStore>((set, get) => ({
 
     const startM = timeToMinutes(orig.endTime);
     const dur = timeToMinutes(orig.endTime) - timeToMinutes(orig.startTime);
-    const endM = Math.min(1020, startM + dur);
+    const endM = Math.min(1439, startM + dur);
 
     const dup: TimetableEvent = {
       ...orig,
-      id: `tt-${Date.now()}`,
+      id: `tt-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
       startTime: minutesToTime(startM),
       endTime: minutesToTime(endM),
     };
 
     data[day].events.push(dup);
-    data[day].events.sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
+    updateDayBoundaries(data, [day]);
     set({
       data,
       undoStack: [...get().undoStack.slice(-30), prev],
@@ -286,10 +361,11 @@ export const useTimetableStore = create<TimetableStore>((set, get) => ({
     const eventIndex = fromEvents.findIndex(e => e.id === eventId);
     if (eventIndex === -1) return;
 
+    const originalEvent = { ...fromEvents[eventIndex] };
     const movingEvent = { ...fromEvents[eventIndex], startTime: newStartTime, endTime: newEndTime };
     const toEvents = data[toDay].events;
 
-    // Check conflict
+    // Check conflict: any event on toDay (excluding eventId itself) that overlaps with [newStartTime, newEndTime]
     const startM = timeToMinutes(newStartTime);
     const endM = timeToMinutes(newEndTime);
     const conflict = toEvents.find(
@@ -303,6 +379,8 @@ export const useTimetableStore = create<TimetableStore>((set, get) => ({
           incomingEvent: movingEvent,
           targetDay: toDay,
           conflictingEvent: conflict,
+          fromDay,
+          originalEvent,
         },
       });
       return;
@@ -311,7 +389,7 @@ export const useTimetableStore = create<TimetableStore>((set, get) => ({
     // No conflict, perform move
     fromEvents.splice(eventIndex, 1);
     toEvents.push(movingEvent);
-    toEvents.sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
+    updateDayBoundaries(data, [fromDay, toDay]);
 
     set({
       data,
@@ -326,56 +404,253 @@ export const useTimetableStore = create<TimetableStore>((set, get) => ({
     if (!conflict) return;
 
     const prev = JSON.parse(JSON.stringify(get().data)) as TimetableData;
-    const { incomingEvent, targetDay, conflictingEvent } = conflict;
     const data = JSON.parse(JSON.stringify(get().data)) as TimetableData;
-    const events = data[targetDay].events;
+    const { incomingEvent, targetDay, conflictingEvent, fromDay, originalEvent } = conflict;
 
-    // Remove incoming event from everywhere first
+    // 1. Remove incomingEvent from everywhere first (in case it existed in fromDay or elsewhere)
     for (const d of ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'] as DayOfWeek[]) {
       data[d].events = data[d].events.filter(e => e.id !== incomingEvent.id);
     }
 
-    const confIndex = events.findIndex(e => e.id === conflictingEvent.id);
+    const incomingStartM = timeToMinutes(incomingEvent.startTime);
+    const incomingEndM = timeToMinutes(incomingEvent.endTime);
+    const incomingDuration = incomingEndM - incomingStartM;
+
+    const affectedDays: DayOfWeek[] = [targetDay];
+    if (fromDay && fromDay !== targetDay) affectedDays.push(fromDay);
 
     if (resolution === 'replace') {
-      if (confIndex !== -1) events.splice(confIndex, 1);
-      events.push(incomingEvent);
-    } else if (resolution === 'push') {
-      events.push(incomingEvent);
-      const incEnd = timeToMinutes(incomingEvent.endTime);
-      let nextAvailable = incEnd;
+      // Elimina los bloques anteriores que se superpongan y coloca el nuevo
+      data[targetDay].events = data[targetDay].events.filter(e => {
+        const eStart = timeToMinutes(e.startTime);
+        const eEnd = timeToMinutes(e.endTime);
+        const overlaps = Math.max(incomingStartM, eStart) < Math.min(incomingEndM, eEnd);
+        return !overlaps;
+      });
 
-      events
-        .filter(e => e.id !== incomingEvent.id && timeToMinutes(e.startTime) >= timeToMinutes(incomingEvent.startTime))
-        .sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime))
-        .forEach(e => {
-          const dur = timeToMinutes(e.endTime) - timeToMinutes(e.startTime);
-          if (timeToMinutes(e.startTime) < nextAvailable) {
-            e.startTime = minutesToTime(nextAvailable);
-            e.endTime = minutesToTime(nextAvailable + dur);
+      data[targetDay].events.push(incomingEvent);
+
+    } else if (resolution === 'push') {
+      // Desplaza los bloques subsiguientes hacia abajo manteniendo su duración
+      const nonPushedEvents: TimetableEvent[] = [];
+      const eventsToPush: TimetableEvent[] = [];
+
+      for (const e of data[targetDay].events) {
+        const eStart = timeToMinutes(e.startTime);
+        const eEnd = timeToMinutes(e.endTime);
+        const overlaps = Math.max(incomingStartM, eStart) < Math.min(incomingEndM, eEnd);
+        if (overlaps || eStart >= incomingStartM) {
+          eventsToPush.push(e);
+        } else {
+          nonPushedEvents.push(e);
+        }
+      }
+
+      eventsToPush.sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
+
+      let cursor = incomingEndM;
+      const pushedResult: TimetableEvent[] = [];
+
+      for (const e of eventsToPush) {
+        const dur = Math.max(15, timeToMinutes(e.endTime) - timeToMinutes(e.startTime));
+        const eStart = timeToMinutes(e.startTime);
+        let newStart = eStart;
+
+        if (newStart < cursor) {
+          newStart = cursor;
+        }
+        let newEnd = newStart + dur;
+        if (newEnd > 1439) {
+          newEnd = 1439;
+          if (newEnd - newStart < 15) {
+            newStart = Math.max(0, newEnd - 15);
           }
-          nextAvailable = timeToMinutes(e.endTime);
+        }
+        cursor = newEnd;
+
+        pushedResult.push({
+          ...e,
+          startTime: minutesToTime(newStart),
+          endTime: minutesToTime(newEnd),
         });
+      }
+
+      data[targetDay].events = [...nonPushedEvents, incomingEvent, ...pushedResult];
+
     } else if (resolution === 'swap') {
-      if (confIndex !== -1) {
-        const oldStart = conflictingEvent.startTime;
-        const oldEnd = conflictingEvent.endTime;
-        events[confIndex].startTime = incomingEvent.startTime;
-        events[confIndex].endTime = incomingEvent.endTime;
-        incomingEvent.startTime = oldStart;
-        incomingEvent.endTime = oldEnd;
-        events.push(incomingEvent);
+      // Intercambia las posiciones entre el bloque nuevo y el conflictivo
+      const durA = incomingDuration;
+      const confStartM = timeToMinutes(conflictingEvent.startTime);
+      const confEndM = timeToMinutes(conflictingEvent.endTime);
+      const durB = confEndM - confStartM;
+
+      if (fromDay && originalEvent && fromDay === targetDay) {
+        // --- CASO 1: Intercambio en el mismo día ---
+        const day = targetDay;
+        const origStartM = timeToMinutes(originalEvent.startTime);
+
+        // Remove both A and B from the day
+        const otherEvents = data[day].events.filter(e => e.id !== incomingEvent.id && e.id !== conflictingEvent.id);
+
+        const minStart = Math.min(origStartM, confStartM);
+        const maxStart = Math.max(origStartM, confStartM);
+
+        const hasIntermediateEvent = otherEvents.some(e => {
+          const s = timeToMinutes(e.startTime);
+          return s > minStart && s < maxStart;
+        });
+
+        if (!hasIntermediateEvent) {
+          // Bloques contiguos/adyacentes en el mismo día
+          let firstEvent: TimetableEvent;
+          let secondEvent: TimetableEvent;
+          let durFirst: number;
+          let durSecond: number;
+
+          if (origStartM > confStartM) {
+            // A era posterior y se movió hacia arriba: A va primero, B va segundo
+            firstEvent = { ...incomingEvent };
+            durFirst = durA;
+            secondEvent = { ...conflictingEvent };
+            durSecond = durB;
+          } else {
+            // A era anterior y se movió hacia abajo: B va primero, A va segundo
+            firstEvent = { ...conflictingEvent };
+            durFirst = durB;
+            secondEvent = { ...incomingEvent };
+            durSecond = durA;
+          }
+
+          const firstStart = minStart;
+          const firstEnd = minStart + durFirst;
+          const secondStart = firstEnd;
+          const secondEnd = secondStart + durSecond;
+
+          firstEvent.startTime = minutesToTime(firstStart);
+          firstEvent.endTime = minutesToTime(firstEnd);
+
+          secondEvent.startTime = minutesToTime(secondStart);
+          secondEvent.endTime = minutesToTime(secondEnd);
+
+          data[day].events = [...otherEvents, firstEvent, secondEvent];
+        } else {
+          // Bloques separados con eventos intermedios en el mismo día
+          const newA: TimetableEvent = {
+            ...incomingEvent,
+            startTime: conflictingEvent.startTime,
+            endTime: minutesToTime(confStartM + durA),
+          };
+          const newB: TimetableEvent = {
+            ...conflictingEvent,
+            startTime: originalEvent.startTime,
+            endTime: minutesToTime(origStartM + durB),
+          };
+
+          data[day].events = [...otherEvents, newA, newB];
+        }
+
+      } else if (fromDay && originalEvent && fromDay !== targetDay) {
+        // --- CASO 2: Intercambio entre días distintos ---
+        const origStartM = timeToMinutes(originalEvent.startTime);
+
+        const newA: TimetableEvent = {
+          ...incomingEvent,
+          startTime: conflictingEvent.startTime,
+          endTime: minutesToTime(confStartM + durA),
+        };
+
+        const newB: TimetableEvent = {
+          ...conflictingEvent,
+          startTime: originalEvent.startTime,
+          endTime: minutesToTime(origStartM + durB),
+        };
+
+        data[targetDay].events = [
+          ...data[targetDay].events.filter(e => e.id !== conflictingEvent.id),
+          newA,
+        ];
+
+        data[fromDay].events = [
+          ...data[fromDay].events.filter(e => e.id !== incomingEvent.id),
+          newB,
+        ];
+
+      } else {
+        // --- CASO 3: Sin día de origen (ej: arrastrado desde la paleta) ---
+        const newA: TimetableEvent = {
+          ...incomingEvent,
+          startTime: conflictingEvent.startTime,
+          endTime: minutesToTime(confStartM + durA),
+        };
+
+        const newB: TimetableEvent = {
+          ...conflictingEvent,
+          startTime: minutesToTime(confStartM + durA),
+          endTime: minutesToTime(confStartM + durA + durB),
+        };
+
+        data[targetDay].events = [
+          ...data[targetDay].events.filter(e => e.id !== conflictingEvent.id),
+          newA,
+          newB,
+        ];
       }
+
     } else if (resolution === 'fit') {
-      const maxEnd = timeToMinutes(conflictingEvent.startTime);
-      const startM = timeToMinutes(incomingEvent.startTime);
-      if (maxEnd > startM) {
-        incomingEvent.endTime = minutesToTime(maxEnd);
-        events.push(incomingEvent);
+      // Acorta la duración del nuevo bloque para ajustarlo al espacio disponible sin mover el otro
+      const confStartM = timeToMinutes(conflictingEvent.startTime);
+      const confEndM = timeToMinutes(conflictingEvent.endTime);
+      const otherEvents = data[targetDay].events.filter(e => e.id !== conflictingEvent.id);
+
+      // Space BEFORE conflictingEvent
+      let gapBeforeStart = incomingStartM;
+      for (const e of otherEvents) {
+        const eEnd = timeToMinutes(e.endTime);
+        if (eEnd <= confStartM && eEnd > gapBeforeStart) {
+          gapBeforeStart = eEnd;
+        }
       }
+      const gapBefore = confStartM - gapBeforeStart;
+
+      // Space AFTER conflictingEvent
+      let gapAfterEnd = Math.max(incomingEndM, confEndM + 60);
+      for (const e of otherEvents) {
+        const eStart = timeToMinutes(e.startTime);
+        if (eStart >= confEndM && eStart < gapAfterEnd) {
+          gapAfterEnd = eStart;
+        }
+      }
+      const gapAfter = gapAfterEnd - confEndM;
+
+      let fittedStartM: number;
+      let fittedEndM: number;
+
+      if (incomingStartM < confStartM && gapBefore >= 15) {
+        fittedStartM = gapBeforeStart;
+        fittedEndM = confStartM;
+      } else if (gapAfter >= 15) {
+        fittedStartM = confEndM;
+        fittedEndM = Math.min(gapAfterEnd, confEndM + incomingDuration);
+      } else if (gapBefore >= 15) {
+        fittedStartM = gapBeforeStart;
+        fittedEndM = confStartM;
+      } else {
+        fittedStartM = confEndM;
+        fittedEndM = confEndM + 30;
+      }
+
+      const fittedEvent: TimetableEvent = {
+        ...incomingEvent,
+        startTime: minutesToTime(fittedStartM),
+        endTime: minutesToTime(fittedEndM),
+      };
+
+      data[targetDay].events.push(fittedEvent);
     }
 
-    events.sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
+    // Invariante de oro: eliminar garantizadamente cualquier superposición y expandir límites
+    updateDayBoundaries(data, affectedDays);
+
     set({
       data,
       conflictState: null,

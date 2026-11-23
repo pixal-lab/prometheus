@@ -85,6 +85,8 @@ export function expandRecurringEvents(blocks: ClassBlock[], startDate: string, e
           current = current.add(1, 'day');
         } else if (rule.type === 'monthly') {
           current = current.add(1, 'month');
+        } else if (rule.type === 'yearly') {
+          current = current.add(1, 'year');
         } else {
           break;
         }

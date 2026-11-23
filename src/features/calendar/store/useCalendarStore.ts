@@ -447,13 +447,15 @@ export const useCalendarStore = create<CalendarStore>((set, get) => ({
     const targetDays = available.map(d => dayCodeMap[d] ?? 0).filter(Boolean);
     const validDays = targetDays.length > 0 ? targetDays : [1, 2, 3, 4, 5];
 
-    let next = dayjs(block.date).add(1, 'day');
-    while (!validDays.includes(next.isoWeekday())) {
-      next = next.add(1, 'day');
-    }
+    const getNextValidDate = (dateStr: string): string => {
+      let d = dayjs(dateStr).add(1, 'day');
+      while (!validDays.includes(d.isoWeekday())) {
+        d = d.add(1, 'day');
+      }
+      return d.format('YYYY-MM-DD');
+    };
 
-    const nextDateStr = next.format('YYYY-MM-DD');
-    const dayDiff = next.diff(dayjs(block.date), 'day');
+    const nextDateStr = getNextValidDate(block.date);
 
     let updatedBlocks = [...classBlocks];
     if (cascade) {
@@ -462,7 +464,7 @@ export const useCalendarStore = create<CalendarStore>((set, get) => ({
         if (b.subject === block.subject && dayjs(b.date).isSameOrAfter(origDate)) {
           return {
             ...b,
-            date: dayjs(b.date).add(dayDiff, 'day').format('YYYY-MM-DD'),
+            date: getNextValidDate(b.date),
           };
         }
         return b;

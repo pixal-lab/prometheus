@@ -5,6 +5,7 @@ import { Button } from '../../../components/ui/Button';
 import { Plus, Trash2, Award } from 'lucide-react';
 import { useTranslation } from '../../../core/i18n/useTranslation';
 import { useToast } from '../../../components/ui/Toast';
+import { useDialog } from '../../../components/ui/Dialog';
 
 interface GradeMatrixProps {
   course: Course;
@@ -21,6 +22,7 @@ export const GradeMatrix: React.FC<GradeMatrixProps> = ({
 }) => {
   const { t } = useTranslation();
   const { showToast } = useToast();
+  const { confirm } = useDialog();
   const { setGrade, deleteGrade, deleteStudent, addEvaluationColumn, deleteEvaluationColumn } = useGradebookStore();
 
   const [newEvalName, setNewEvalName] = useState('');
@@ -42,7 +44,14 @@ export const GradeMatrix: React.FC<GradeMatrixProps> = ({
   };
 
   const handleDeleteEvaluation = async (name: string) => {
-    if (confirm(`¿Eliminar la evaluación "${name}" y todas las notas asignadas a ella?`)) {
+    const confirmed = await confirm({
+      title: 'Eliminar Evaluación',
+      message: `¿Deseas eliminar la evaluación "${name}" y todas las notas asignadas a ella? Esta acción no se puede deshacer.`,
+      confirmText: 'Eliminar Evaluación',
+      variant: 'danger',
+      icon: 'trash',
+    });
+    if (confirmed) {
       await deleteEvaluationColumn(course.id, currentSubject, name);
       showToast(`Evaluación "${name}" eliminada`, 'info');
     }
@@ -189,9 +198,18 @@ export const GradeMatrix: React.FC<GradeMatrixProps> = ({
                           max="7"
                           value={val}
                           onChange={e => {
-                            const num = parseFloat(e.target.value) || 0;
-                            const catId = gradeRecord?.categoryId || registered?.categoryId || selectedCatId;
-                            setGrade(student.id, currentSubject, catId, num, name);
+                            const raw = e.target.value.trim();
+                            if (!raw || raw === '0') {
+                              if (gradeRecord) {
+                                deleteGrade(gradeRecord.id);
+                              }
+                              return;
+                            }
+                            const num = parseFloat(raw);
+                            if (!isNaN(num)) {
+                              const catId = gradeRecord?.categoryId || registered?.categoryId || selectedCatId;
+                              setGrade(student.id, currentSubject, catId, num, name);
+                            }
                           }}
                           placeholder="-"
                           className={`w-16 py-1 px-2 text-center text-sm font-mono font-bold rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors ${val && Number(val) >= 4.0
@@ -220,9 +238,17 @@ export const GradeMatrix: React.FC<GradeMatrixProps> = ({
 
                   <td className="py-2.5 px-2 text-center">
                     <button
-                      onClick={() => {
-                        if (confirm(`¿Eliminar al alumno "${student.name}" del curso?`)) {
+                      onClick={async () => {
+                        const confirmed = await confirm({
+                          title: 'Eliminar Estudiante',
+                          message: `¿Deseas eliminar al alumno "${student.name}" del curso? Todas sus calificaciones registradas se eliminarán.`,
+                          confirmText: 'Eliminar Estudiante',
+                          variant: 'danger',
+                          icon: 'trash',
+                        });
+                        if (confirmed) {
                           deleteStudent(student.id);
+                          showToast(`Estudiante "${student.name}" eliminado`, 'info');
                         }
                       }}
                       className="p-1 text-slate-300 hover:text-rose-600 transition-colors"

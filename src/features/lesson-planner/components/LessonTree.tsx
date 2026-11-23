@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { ChevronRight, ChevronDown, Folder, FileText, Plus, Trash2, Edit2, FolderPlus } from 'lucide-react';
 import { LessonFolder, LessonItem, LessonTreeNode } from '../../../core/types/lesson.types';
 import { useLessonPlannerStore } from '../store/useLessonPlannerStore';
+import { useDialog } from '../../../components/ui/Dialog';
+import { useToast } from '../../../components/ui/Toast';
 
 interface TreeNodeProps {
   name: string;
@@ -13,6 +15,8 @@ interface TreeNodeProps {
 export const TreeNode: React.FC<TreeNodeProps> = ({ name, node, path, filter }) => {
   const [isExpanded, setIsExpanded] = useState(true);
   const { activeLessonPath, setActiveLesson, createFolder, createLesson, deleteNode, renameNode } = useLessonPlannerStore();
+  const { prompt, confirm } = useDialog();
+  const { showToast } = useToast();
   const isFolder = 'children' in node;
   const isSelected = !isFolder && activeLessonPath.join('/') === path.join('/');
 
@@ -36,35 +40,64 @@ export const TreeNode: React.FC<TreeNodeProps> = ({ name, node, path, filter }) 
 
   const handleAddFolder = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    const folderName = prompt('Nombre de la nueva carpeta / unidad:');
+    const folderName = await prompt({
+      title: 'Nueva Carpeta / Unidad',
+      message: `Crear una nueva carpeta o unidad dentro de "${name}":`,
+      placeholder: 'Ej: Unidad 2: Geometría',
+      confirmText: 'Crear Carpeta',
+      icon: 'folder',
+    });
     if (folderName?.trim()) {
-      await createFolder(path, folderName);
+      await createFolder(path, folderName.trim());
       setIsExpanded(true);
+      showToast(`Carpeta "${folderName.trim()}" creada con éxito`, 'success');
     }
   };
 
   const handleAddLesson = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    const title = prompt('Título de la nueva lección:');
+    const title = await prompt({
+      title: 'Nueva Lección',
+      message: `Crear una nueva lección dentro de "${name}":`,
+      placeholder: 'Ej: Lección 1: Introducción a los conceptos clave',
+      confirmText: 'Crear Lección',
+      icon: 'lesson',
+    });
     if (title?.trim()) {
-      await createLesson(path, title);
+      await createLesson(path, title.trim());
       setIsExpanded(true);
+      showToast(`Lección "${title.trim()}" creada con éxito`, 'success');
     }
   };
 
   const handleRename = async (e: React.MouseEvent) => {
     e.stopPropagation();
     const currentName = 'title' in node ? node.title : node.name;
-    const newName = prompt('Renombrar:', currentName);
-    if (newName?.trim() && newName !== currentName) {
-      await renameNode(path, newName);
+    const newName = await prompt({
+      title: isFolder ? 'Renombrar Carpeta' : 'Renombrar Lección',
+      message: `Introduce el nuevo nombre para "${currentName}":`,
+      defaultValue: currentName,
+      confirmText: 'Guardar',
+      icon: 'edit',
+    });
+    if (newName?.trim() && newName.trim() !== currentName) {
+      await renameNode(path, newName.trim());
+      showToast('Renombrado con éxito', 'success');
     }
   };
 
   const handleDelete = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (confirm(`¿Eliminar "${name}" y todo su contenido?`)) {
+    const confirmed = await confirm({
+      title: isFolder ? 'Eliminar Carpeta' : 'Eliminar Lección',
+      message: `¿Estás seguro de que deseas eliminar "${name}" y todo su contenido? Esta acción no se puede deshacer.`,
+      confirmText: 'Eliminar',
+      variant: 'danger',
+      icon: 'trash',
+    });
+    if (confirmed) {
       await deleteNode(path);
+      showToast(isFolder ? 'Carpeta eliminada' : 'Lección eliminada', 'info');
     }
   };
 

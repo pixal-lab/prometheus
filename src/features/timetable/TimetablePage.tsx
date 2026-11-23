@@ -45,6 +45,7 @@ export const TimetablePage: React.FC = () => {
     undoStack,
     redoStack,
     isLoading,
+    setDraggedPaletteItem,
   } = useTimetableStore();
 
   const { subjects, subjectOrder, loadData: loadCalendarData } = useCalendarStore();
@@ -103,7 +104,7 @@ export const TimetablePage: React.FC = () => {
 
   const handleTimeSlotClick = async (day: DayOfWeek, timeStr: string) => {
     const [h, m] = timeStr.split(':').map(Number);
-    const endMinutes = h * 60 + m + 90; // Default 1h30m block
+    const endMinutes = Math.min(1439, h * 60 + m + 90); // Default 1h30m block
     const endH = Math.floor(endMinutes / 60);
     const endMin = endMinutes % 60;
     const endTimeStr = `${String(endH).padStart(2, '0')}:${String(endMin).padStart(2, '0')}`;
@@ -115,7 +116,13 @@ export const TimetablePage: React.FC = () => {
       color: '#1abc9c',
       type: 'course',
     });
-    showToast('Bloque añadido', 'info');
+
+    const dayEnd = data[day]?.endMinutes ?? 1020;
+    if (endMinutes > dayEnd) {
+      showToast(`Bloque añadido (extiende la jornada hasta las ${endTimeStr})`, 'warning');
+    } else {
+      showToast('Bloque añadido', 'info');
+    }
   };
 
   const handleDropSubject = async (
@@ -127,7 +134,7 @@ export const TimetablePage: React.FC = () => {
   ) => {
     const [h, m] = timeStr.split(':').map(Number);
     const duration = type === 'break' ? 30 : type === 'lunch' ? 60 : 90;
-    const endMinutes = h * 60 + m + duration;
+    const endMinutes = Math.min(1439, h * 60 + m + duration);
     const endH = Math.floor(endMinutes / 60);
     const endMin = endMinutes % 60;
     const endTimeStr = `${String(endH).padStart(2, '0')}:${String(endMin).padStart(2, '0')}`;
@@ -139,14 +146,20 @@ export const TimetablePage: React.FC = () => {
       color,
       type,
     });
-    showToast(`Bloque de "${subjectTitle}" añadido en ${day}`, 'success');
+
+    const dayEnd = data[day]?.endMinutes ?? 1020;
+    if (endMinutes > dayEnd) {
+      showToast(`Bloque de "${subjectTitle}" añadido (extiende la jornada hasta las ${endTimeStr})`, 'warning');
+    } else {
+      showToast(`Bloque de "${subjectTitle}" añadido en ${day}`, 'success');
+    }
   };
 
   const handleAddQuickBlock = async (type: TimetableBlockType, title: string, durationMinutes = 45) => {
     const day: DayOfWeek = 'monday';
     const startTime = '08:00';
     const [h, m] = startTime.split(':').map(Number);
-    const endMinutes = h * 60 + m + durationMinutes;
+    const endMinutes = Math.min(1439, h * 60 + m + durationMinutes);
     const endH = Math.floor(endMinutes / 60);
     const endMin = endMinutes % 60;
     const endTime = `${String(endH).padStart(2, '0')}:${String(endMin).padStart(2, '0')}`;
@@ -158,7 +171,13 @@ export const TimetablePage: React.FC = () => {
       color: nonCourseConfigs[type] || '#3b82f6',
       type,
     });
-    showToast(`Bloque "${title}" añadido`, 'info');
+
+    const dayEnd = data[day]?.endMinutes ?? 1020;
+    if (endMinutes > dayEnd) {
+      showToast(`Bloque "${title}" añadido (extiende la jornada hasta las ${endTime})`, 'warning');
+    } else {
+      showToast(`Bloque "${title}" añadido`, 'info');
+    }
   };
 
   // Ordered list of subjects from Calendar store
@@ -273,11 +292,13 @@ export const TimetablePage: React.FC = () => {
                     key={sub.name}
                     draggable
                     onDragStart={e => {
+                      setDraggedPaletteItem({ title: sub.name, color: sub.color, type: 'course', durationMinutes: 90 });
                       e.dataTransfer.setData(
                         'application/json',
                         JSON.stringify({ title: sub.name, color: sub.color, type: 'course' })
                       );
                     }}
+                    onDragEnd={() => setDraggedPaletteItem(null)}
                     onClick={() => handleDropSubject('monday', '08:00', sub.name, sub.color, 'course')}
                     className="flex items-center gap-2.5 p-2 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-grab active:cursor-grabbing text-xs font-semibold text-slate-700 dark:text-slate-200 transition-colors select-none group"
                     title="Arrastra a la grilla o pulsa para añadir en lunes 08:00"
@@ -304,11 +325,13 @@ export const TimetablePage: React.FC = () => {
               <div
                 draggable
                 onDragStart={e => {
+                  setDraggedPaletteItem({ title: 'Recreo', color: nonCourseConfigs.break, type: 'break', durationMinutes: 30 });
                   e.dataTransfer.setData(
                     'application/json',
                     JSON.stringify({ title: 'Recreo', color: nonCourseConfigs.break, type: 'break' })
                   );
                 }}
+                onDragEnd={() => setDraggedPaletteItem(null)}
                 onClick={() => handleAddQuickBlock('break', 'Recreo', 30)}
                 className="flex items-center gap-2.5 p-2 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-grab active:cursor-grabbing text-xs font-semibold text-slate-700 dark:text-slate-200 transition-colors select-none"
               >
@@ -320,11 +343,13 @@ export const TimetablePage: React.FC = () => {
               <div
                 draggable
                 onDragStart={e => {
+                  setDraggedPaletteItem({ title: 'Almuerzo', color: nonCourseConfigs.lunch, type: 'lunch', durationMinutes: 60 });
                   e.dataTransfer.setData(
                     'application/json',
                     JSON.stringify({ title: 'Almuerzo', color: nonCourseConfigs.lunch, type: 'lunch' })
                   );
                 }}
+                onDragEnd={() => setDraggedPaletteItem(null)}
                 onClick={() => handleAddQuickBlock('lunch', 'Almuerzo', 60)}
                 className="flex items-center gap-2.5 p-2 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-grab active:cursor-grabbing text-xs font-semibold text-slate-700 dark:text-slate-200 transition-colors select-none"
               >
@@ -336,11 +361,13 @@ export const TimetablePage: React.FC = () => {
               <div
                 draggable
                 onDragStart={e => {
+                  setDraggedPaletteItem({ title: 'Planificación', color: nonCourseConfigs.planning, type: 'planning', durationMinutes: 90 });
                   e.dataTransfer.setData(
                     'application/json',
                     JSON.stringify({ title: 'Planificación', color: nonCourseConfigs.planning, type: 'planning' })
                   );
                 }}
+                onDragEnd={() => setDraggedPaletteItem(null)}
                 onClick={() => handleAddQuickBlock('planning', 'Planificación', 90)}
                 className="flex items-center gap-2.5 p-2 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-grab active:cursor-grabbing text-xs font-semibold text-slate-700 dark:text-slate-200 transition-colors select-none"
               >
@@ -352,11 +379,13 @@ export const TimetablePage: React.FC = () => {
               <div
                 draggable
                 onDragStart={e => {
+                  setDraggedPaletteItem({ title: 'Taller Especial', color: nonCourseConfigs.special, type: 'special', durationMinutes: 60 });
                   e.dataTransfer.setData(
                     'application/json',
                     JSON.stringify({ title: 'Taller Especial', color: nonCourseConfigs.special, type: 'special' })
                   );
                 }}
+                onDragEnd={() => setDraggedPaletteItem(null)}
                 onClick={() => handleAddQuickBlock('special', 'Taller Especial', 60)}
                 className="flex items-center gap-2.5 p-2 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-grab active:cursor-grabbing text-xs font-semibold text-slate-700 dark:text-slate-200 transition-colors select-none"
               >

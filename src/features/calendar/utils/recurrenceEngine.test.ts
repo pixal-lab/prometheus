@@ -71,6 +71,27 @@ describe('Recurrence Engine Unit Tests', () => {
     expect(expanded[4].date).toBe('2026-03-11'); // Wed next week
   });
 
+  it('expands yearly recurrence correctly', () => {
+    const block: ClassBlock = {
+      id: 'block-yearly',
+      subject: 'Colegio',
+      topic: 'Aniversario Institucional',
+      date: '2026-04-10',
+      isRecurring: true,
+      recurrenceRule: {
+        type: 'yearly',
+        ends: 'afterOccurrences',
+        occurrences: 3,
+      },
+    };
+
+    const expanded = expandRecurringEvents([block], '2026-01-01', '2029-01-01');
+    expect(expanded.length).toBe(3);
+    expect(expanded[0].date).toBe('2026-04-10');
+    expect(expanded[1].date).toBe('2027-04-10');
+    expect(expanded[2].date).toBe('2028-04-10');
+  });
+
   it('retains non-recurring blocks unchanged if inside date range', () => {
     const block: ClassBlock = {
       id: 'block-single',

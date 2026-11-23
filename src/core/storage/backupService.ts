@@ -15,6 +15,7 @@ export interface FullBackupData {
   timetableData?: any;
   timetableNonCourseColors?: Record<string, string>;
   lessonPlannerData?: any;
+  lessonTemplates?: any[];
   gradebookData?: any;
 }
 
@@ -38,6 +39,7 @@ export class BackupService {
         timetableData: await storage.getItem('timetableData'),
         timetableNonCourseColors: (await storage.getItem<Record<string, string>>('timetableNonCourseColors')) || undefined,
         lessonPlannerData: await storage.getItem('lessonPlannerData'),
+        lessonTemplates: (await storage.getItem('lessonTemplates')) || [],
         gradebookData: await storage.getItem('gradebookData'),
       };
 
@@ -192,6 +194,11 @@ export class BackupService {
       // 9. Libro de clases
       if (parsed.gradebookData) {
         await storage.setItem('gradebookData', parsed.gradebookData);
+      }
+
+      // 10. Plantillas de lección
+      if (parsed.lessonTemplates && Array.isArray(parsed.lessonTemplates)) {
+        await storage.setItem('lessonTemplates', parsed.lessonTemplates);
       }
 
       logger.info('Storage', `Respaldo importado correctamente. ${count} bloques de clase procesados.`);

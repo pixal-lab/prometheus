@@ -6,6 +6,8 @@ import { Select } from '../../../components/ui/Select';
 import { TimetableEvent, DayOfWeek, TimetableBlockType } from '../../../core/types/timetable.types';
 import { useTimetableStore } from '../store/useTimetableStore';
 import { useTranslation } from '../../../core/i18n/useTranslation';
+import { useDialog } from '../../../components/ui/Dialog';
+import { useToast } from '../../../components/ui/Toast';
 
 interface EditBlockModalProps {
   isOpen: boolean;
@@ -17,6 +19,8 @@ interface EditBlockModalProps {
 export const EditBlockModal: React.FC<EditBlockModalProps> = ({ isOpen, onClose, day, event }) => {
   const { t } = useTranslation();
   const { updateEvent, deleteEvent, duplicateEvent } = useTimetableStore();
+  const { confirm } = useDialog();
+  const { showToast } = useToast();
 
   const [title, setTitle] = useState('');
   const [startTime, setStartTime] = useState('08:00');
@@ -52,8 +56,17 @@ export const EditBlockModal: React.FC<EditBlockModalProps> = ({ isOpen, onClose,
   };
 
   const handleDelete = async () => {
-    if (confirm(`¿Eliminar el bloque "${title}"?`)) {
+    if (!event) return;
+    const confirmed = await confirm({
+      title: 'Eliminar Bloque',
+      message: `¿Deseas eliminar el bloque "${title}" del horario?`,
+      confirmText: 'Eliminar Bloque',
+      variant: 'danger',
+      icon: 'trash',
+    });
+    if (confirmed) {
       await deleteEvent(day, event.id);
+      showToast(`Bloque "${title}" eliminado`, 'info');
       onClose();
     }
   };

@@ -66,29 +66,33 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
     return grades.filter(g => g.studentId === currentStudent.id);
   }, [grades, currentStudent?.id]);
 
-  // Subject averages
+  // Subject averages (calculates category average first, then weights across categories, identical to GradeMatrix)
   const subjectAverages = useMemo(() => {
     const map: Record<string, { totalWeighted: number; totalWeight: number; grades: GradeItem[]; simpleAvg: number }> = {};
     for (const sub of course.subjects) {
-      const subGrades = studentGrades.filter(g => g.subject === sub);
-      let totalW = 0;
-      let sumW = 0;
-      let sumG = 0;
+      const subGrades = studentGrades.filter(g => g.subject === sub && g.grade > 0);
+      let weightedSum = 0;
+      let totalWeightUsed = 0;
 
-      for (const g of subGrades) {
-        sumG += g.grade;
-        const cat = course.categories.find(c => c.id === g.categoryId);
-        if (cat) {
-          totalW += g.grade * (cat.weight / 100);
-          sumW += cat.weight / 100;
-        }
+      if (course.categories && course.categories.length > 0) {
+        course.categories.forEach(cat => {
+          const catGrades = subGrades.filter(g => g.categoryId === cat.id);
+          if (catGrades.length > 0) {
+            const catAvg = catGrades.reduce((s, g) => s + g.grade, 0) / catGrades.length;
+            weightedSum += catAvg * (cat.weight / 100);
+            totalWeightUsed += cat.weight;
+          }
+        });
       }
 
+      const totalWeighted = totalWeightUsed > 0 ? (weightedSum / totalWeightUsed) * 100 : 0;
+      const simpleAvg = subGrades.length > 0 ? subGrades.reduce((s, g) => s + g.grade, 0) / subGrades.length : 0;
+
       map[sub] = {
-        totalWeighted: sumW > 0 ? totalW / sumW : 0,
-        totalWeight: sumW,
+        totalWeighted,
+        totalWeight: totalWeightUsed,
         grades: subGrades,
-        simpleAvg: subGrades.length > 0 ? sumG / subGrades.length : 0,
+        simpleAvg,
       };
     }
     return map;
@@ -103,7 +107,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
     return averages.reduce((a, b) => a + b, 0) / averages.length;
   }, [subjectAverages]);
 
-  // Attendance stats for student
+  // Attendance stats for student (excused absences are excluded from countable total)
   const studentAttendance = useMemo(() => {
     if (!currentStudent) return { present: 0, absent: 0, late: 0, excused: 0, total: 0, rate: 0 };
     const recs = attendance.filter(a => a.studentId === currentStudent.id);
@@ -112,7 +116,8 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
     const late = recs.filter(a => a.status === 'late').length;
     const excused = recs.filter(a => a.status === 'excused').length;
     const total = recs.length;
-    const rate = total > 0 ? Math.round(((present + late * 0.5) / total) * 100) : 100;
+    const effectiveTotal = total - excused;
+    const rate = effectiveTotal > 0 ? Math.round(((present + late * 0.5) / effectiveTotal) * 100) : (total > 0 ? 100 : 100);
     return { present, absent, late, excused, total, rate };
   }, [attendance, currentStudent?.id]);
 
