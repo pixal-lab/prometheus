@@ -1,6 +1,9 @@
 import React, { Suspense } from 'react';
 import { createBrowserRouter } from 'react-router-dom';
 import { AppLayout } from './layout/AppLayout';
+import { useTranslation } from '../core/i18n/useTranslation';
+import { NotFoundPage } from './NotFoundPage';
+import { RootErrorBoundary } from './RootErrorBoundary';
 
 // Lazy load feature pages to split the 1.35MB monolithic bundle and maximize offline load speed
 const CalendarPage = React.lazy(() =>
@@ -19,17 +22,21 @@ const ProofCorrectionPage = React.lazy(() =>
   import('../features/grade-calculator/ProofCorrectionPage').then(m => ({ default: m.ProofCorrectionPage }))
 );
 
-const PageFallback: React.FC = () => (
-  <div className="flex flex-col items-center justify-center min-h-[50vh] gap-3 text-slate-400 select-none animate-pulse">
-    <div className="w-10 h-10 rounded-full border-2 border-orange-500 border-t-transparent animate-spin" />
-    <span className="text-xs font-semibold tracking-wider uppercase text-slate-500">Cargando aplicación...</span>
-  </div>
-);
+const PageFallback: React.FC = () => {
+  const { t } = useTranslation();
+  return (
+    <div className="flex flex-col items-center justify-center min-h-[50vh] gap-3 text-slate-400 select-none animate-pulse">
+      <div className="w-10 h-10 rounded-full border-2 border-orange-500 border-t-transparent animate-spin" />
+      <span className="text-xs font-semibold tracking-wider uppercase text-slate-500">{t('loading_app')}</span>
+    </div>
+  );
+};
 
 export const router = createBrowserRouter([
   {
     path: '/',
     element: <AppLayout />,
+    errorElement: <RootErrorBoundary />,
     children: [
       {
         index: true,
@@ -70,6 +77,10 @@ export const router = createBrowserRouter([
             <ProofCorrectionPage />
           </Suspense>
         ),
+      },
+      {
+        path: '*',
+        element: <NotFoundPage />,
       },
     ],
   },

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { TimetableEvent, DayOfWeek } from '../../../core/types/timetable.types';
 import { Edit3, Copy, Trash2, Clock } from 'lucide-react';
+import { useTranslation } from '../../../core/i18n/useTranslation';
 
 interface TimetableContextMenuProps {
   x: number;
@@ -23,6 +24,7 @@ export const TimetableContextMenu: React.FC<TimetableContextMenuProps> = ({
   onDuplicate,
   onDelete,
 }) => {
+  const { t } = useTranslation();
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -69,7 +71,7 @@ export const TimetableContextMenu: React.FC<TimetableContextMenuProps> = ({
         className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 transition-colors text-left"
       >
         <Edit3 size={14} className="text-blue-500" />
-        <span>Editar Bloque</span>
+        <span>{t('edit_block')}</span>
       </button>
 
       <button
@@ -80,7 +82,7 @@ export const TimetableContextMenu: React.FC<TimetableContextMenuProps> = ({
         className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 transition-colors text-left"
       >
         <Copy size={14} className="text-purple-500" />
-        <span>Duplicar Bloque</span>
+        <span>{t('duplicate_block')}</span>
       </button>
 
       <div className="h-px bg-slate-100 dark:bg-slate-800 my-0.5" />
@@ -93,7 +95,7 @@ export const TimetableContextMenu: React.FC<TimetableContextMenuProps> = ({
         className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/40 text-red-600 dark:text-red-400 transition-colors text-left"
       >
         <Trash2 size={14} />
-        <span>Eliminar Bloque</span>
+        <span>{t('delete_block')}</span>
       </button>
     </div>
   );

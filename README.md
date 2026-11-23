@@ -1,10 +1,10 @@
-# Prometheus Educational Suite (React + TypeScript) 🔥
+# Prometheus Educational Suite (React + TypeScript)
 
 Esta es la nueva versión moderna de **Prometheus**, migrada a **React 19 + TypeScript + Vite + Tailwind CSS**, manteniendo el **100% de las funcionalidades**, funcionamiento **100% offline**, persistencia en IndexedDB (Dexie.js) y compatibilidad total con los respaldos `.json` previos.
 
 ---
 
-## 🚀 Aplicaciones Integradas en la Suite
+## Aplicaciones Integradas en la Suite
 
 1. **Calendario y Planificador Anual** (`/`):
    - Vistas: Mes, Semana y Agenda.
@@ -38,7 +38,7 @@ Esta es la nueva versión moderna de **Prometheus**, migrada a **React 19 + Type
 
 ---
 
-## 🛠️ Comandos de Desarrollo
+## Comandos de Desarrollo
 
 En la carpeta `prometheus-app/`:
 
@@ -58,7 +58,7 @@ npm run preview
 
 ---
 
-## 🗄️ Persistencia y Copias de Seguridad
+## Persistencia y Copias de Seguridad
 
 - Todos los datos se guardan de forma local en el navegador del usuario utilizando **IndexedDB** a través de **Dexie.js**, con respaldo en `localStorage`.
 - Los datos de la versión anterior en `localforage` se detectan y migran automáticamente en el primer inicio.

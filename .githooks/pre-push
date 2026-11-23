@@ -1,13 +1,13 @@
 #!/bin/sh
-echo "🧪 [CI Local] Ejecutando pruebas unitarias antes del push..."
+echo "[CI Local] Ejecutando pruebas unitarias antes del push..."
 npm test
 STATUS=$?
 if [ $STATUS -ne 0 ]; then
   echo ""
-  echo "❌ Error: Las pruebas unitarias locales han fallado."
-  echo "🚫 El push ha sido cancelado para proteger el despliegue."
+  echo "[ERROR] Las pruebas unitarias locales han fallado."
+  echo "[CANCELADO] El push ha sido cancelado para proteger el despliegue."
   echo ""
   exit 1
 fi
-echo "✅ Pruebas unitarias pasadas exitosamente. Procediendo con el push..."
+echo "[SUCCESS] Pruebas unitarias pasadas exitosamente. Procediendo con el push..."
 exit 0

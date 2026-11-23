@@ -2,7 +2,7 @@ import React from 'react';
 import { Modal } from '../../../components/ui/Modal';
 import { Button } from '../../../components/ui/Button';
 import { useTimetableStore } from '../store/useTimetableStore';
-import { AlertTriangle, ArrowDown, ArrowLeftRight, Check, Crop } from 'lucide-react';
+import { AlertTriangle, ArrowDown, ArrowLeftRight, Check, Crop, Ban } from 'lucide-react';
 import { useTranslation } from '../../../core/i18n/useTranslation';
 
 const DAY_LABELS: Record<string, string> = {
@@ -93,7 +93,7 @@ export const ConflictModal: React.FC = () => {
         </div>
 
         <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-          ¿Cómo deseas resolver este conflicto?
+          {t('conflict_how_resolve')}
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -107,7 +107,7 @@ export const ConflictModal: React.FC = () => {
                 {t('conflict_replace')}
               </span>
               <span className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 block">
-                Elimina el bloque conflictivo y coloca el nuevo en ese horario.
+                {t('conflict_replace_desc')}
               </span>
             </div>
           </button>
@@ -127,15 +127,17 @@ export const ConflictModal: React.FC = () => {
                 {t('conflict_push')}
               </span>
               <span className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 block">
-                Desplaza los bloques subsiguientes hacia abajo en cascada manteniendo su duración.
+                {t('conflict_push_desc')}
               </span>
               {pushExceedsMidnight ? (
-                <span className="text-[11px] font-semibold text-red-600 dark:text-red-400 mt-1.5 block bg-red-50 dark:bg-red-950/50 p-1.5 rounded border border-red-200 dark:border-red-800">
-                  ⛔ No permitido: desplazar los bloques superaría las 23:59 del día.
+                <span className="text-[11px] font-semibold text-red-600 dark:text-red-400 mt-1.5 flex items-center gap-1.5 bg-red-50 dark:bg-red-950/50 p-1.5 rounded border border-red-200 dark:border-red-800">
+                  <Ban size={14} className="shrink-0" />
+                  <span>{t('conflict_push_midnight')}</span>
                 </span>
               ) : pushExceedsSchedule ? (
-                <span className="text-[11px] font-semibold text-amber-700 dark:text-amber-300 mt-1.5 block bg-amber-50 dark:bg-amber-950/60 p-1.5 rounded border border-amber-200 dark:border-amber-800">
-                  ⚠️ Extenderá el horario de clases hasta las {minutesToTime(pushEndMinutes)} (la jornada habitual finaliza a las {minutesToTime(dayEndMinutes)}).
+                <span className="text-[11px] font-semibold text-amber-700 dark:text-amber-300 mt-1.5 flex items-center gap-1.5 bg-amber-50 dark:bg-amber-950/60 p-1.5 rounded border border-amber-200 dark:border-amber-800">
+                  <AlertTriangle size={14} className="shrink-0" />
+                  <span>{t('conflict_push_schedule')}</span>
                 </span>
               ) : null}
             </div>
@@ -168,7 +170,7 @@ export const ConflictModal: React.FC = () => {
                 {t('conflict_fit')}
               </span>
               <span className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 block">
-                Acorta la duración del nuevo bloque para ajustarlo al espacio libre sin mover el otro.
+                {t('conflict_fit_desc')}
               </span>
             </div>
           </button>

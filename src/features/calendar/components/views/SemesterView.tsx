@@ -1,6 +1,7 @@
 import React from 'react';
 import dayjs from 'dayjs';
 import { ClassBlock, SubjectConfig, DayTypeInfo } from '../../../../core/types/calendar.types';
+import { useTranslation } from '../../../../core/i18n/useTranslation';
 
 interface SemesterViewProps {
   currentDate: string;
@@ -12,8 +13,6 @@ interface SemesterViewProps {
   onDayClick: (date: string) => void;
 }
 
-const WEEKDAYS = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
-
 export const SemesterView: React.FC<SemesterViewProps> = ({
   currentDate,
   blocks,
@@ -23,6 +22,16 @@ export const SemesterView: React.FC<SemesterViewProps> = ({
   onAddEventClick,
   onDayClick,
 }) => {
+  const { t } = useTranslation();
+  const weekdays = [
+    t('mon_short').charAt(0),
+    t('tue_short').charAt(0),
+    t('wed_short').charAt(0),
+    t('thu_short').charAt(0),
+    t('fri_short').charAt(0),
+    t('sat_short').charAt(0),
+    t('sun_short').charAt(0),
+  ];
   const current = dayjs(currentDate);
   // Semester 1: months 0 to 5 (Jan-Jun), Semester 2: months 6 to 11 (Jul-Dec)
   const semesterStart = current.month() < 6 ? 0 : 6;
@@ -51,12 +60,12 @@ export const SemesterView: React.FC<SemesterViewProps> = ({
                 {mDate.format('MMMM YYYY')}
               </h3>
               <span className="text-xs font-mono text-slate-400">
-                {blocks.filter(b => b.date.startsWith(mDate.format('YYYY-MM'))).length} clases
+                {blocks.filter(b => b.date.startsWith(mDate.format('YYYY-MM'))).length} {t('classes_count')}
               </span>
             </div>
 
             <div className="grid grid-cols-7 py-2 border-b border-slate-100 dark:border-slate-800 text-center text-[10px] font-bold text-slate-400">
-              {WEEKDAYS.map(wd => (
+              {weekdays.map(wd => (
                 <div key={wd}>{wd}</div>
               ))}
             </div>

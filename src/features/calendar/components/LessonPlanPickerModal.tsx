@@ -4,6 +4,7 @@ import { Button } from '../../../components/ui/Button';
 import { storage } from '../../../core/storage/dexieStorage';
 import { LessonPlannerData, LessonItem } from '../../../core/types/lesson.types';
 import { Folder, FileText, ChevronRight, ChevronDown, Check, Search } from 'lucide-react';
+import { useTranslation } from '../../../core/i18n/useTranslation';
 
 interface LessonPlanPickerModalProps {
   isOpen: boolean;
@@ -16,6 +17,7 @@ export const LessonPlanPickerModal: React.FC<LessonPlanPickerModalProps> = ({
   onClose,
   onSelect,
 }) => {
+  const { t } = useTranslation();
   const [data, setData] = useState<LessonPlannerData>({});
   const [selectedLesson, setSelectedLesson] = useState<{ id: string; title: string; content?: any } | null>(null);
   const [openFolders, setOpenFolders] = useState<Record<string, boolean>>({});
@@ -94,10 +96,10 @@ export const LessonPlanPickerModal: React.FC<LessonPlanPickerModalProps> = ({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Seleccionar Plan de Lección" maxWidth="lg">
+    <Modal isOpen={isOpen} onClose={onClose} title={t('select_plan_title')} maxWidth="lg">
       <div className="flex flex-col gap-4">
         <p className="text-xs text-slate-500">
-          Explora la jerarquía de planes de clase para vincular los objetivos y actividades directamente a esta sesión en el calendario.
+          {t('select_plan_desc')}
         </p>
 
         {/* Search */}
@@ -105,7 +107,7 @@ export const LessonPlanPickerModal: React.FC<LessonPlanPickerModalProps> = ({
           <Search className="absolute left-3 top-2.5 text-slate-400" size={15} />
           <input
             type="text"
-            placeholder="Buscar por título de lección..."
+            placeholder={t('search_lesson_ph')}
             value={search}
             onChange={e => setSearch(e.target.value)}
             className="w-full pl-9 pr-3 py-1.5 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500"
@@ -118,7 +120,7 @@ export const LessonPlanPickerModal: React.FC<LessonPlanPickerModalProps> = ({
             Object.entries(data).map(([courseKey, courseNode]) => renderTree(courseNode, [courseKey]))
           ) : (
             <div className="text-center py-8 text-xs text-slate-400">
-              No hay planes de lección creados en el Planificador.
+              {t('no_plans_in_planner')}
             </div>
           )}
         </div>
@@ -126,7 +128,7 @@ export const LessonPlanPickerModal: React.FC<LessonPlanPickerModalProps> = ({
         {selectedLesson && (
           <div className="p-3 bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-800 rounded-xl text-xs flex items-center justify-between">
             <span className="font-semibold text-orange-900 dark:text-orange-200 truncate">
-              Seleccionado: <strong>{selectedLesson.title}</strong>
+              {t('selected_plan')} <strong>{selectedLesson.title}</strong>
             </span>
           </div>
         )}
@@ -134,10 +136,10 @@ export const LessonPlanPickerModal: React.FC<LessonPlanPickerModalProps> = ({
         {/* Buttons */}
         <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
           <Button onClick={onClose} variant="ghost" size="sm">
-            Cancelar
+            {t('cancel')}
           </Button>
           <Button onClick={handleConfirm} disabled={!selectedLesson} variant="primary" size="sm">
-            <Check size={14} /> Vincular Plan
+            <Check size={14} /> {t('link_plan_btn')}
           </Button>
         </div>
       </div>

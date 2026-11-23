@@ -4,6 +4,7 @@ import { useGradebookStore } from '../store/useGradebookStore';
 import { Button } from '../../../components/ui/Button';
 import { Plus, Trash2, StickyNote, Bell } from 'lucide-react';
 import { useToast } from '../../../components/ui/Toast';
+import { useTranslation } from '../../../core/i18n/useTranslation';
 
 interface StudentNotesProps {
   students: Student[];
@@ -16,6 +17,7 @@ export const StudentNotesView: React.FC<StudentNotesProps> = ({
   observations,
   reminders,
 }) => {
+  const { t } = useTranslation();
   const { showToast } = useToast();
   const { setStudentObservation, addStudentReminder, deleteStudentReminder } = useGradebookStore();
 
@@ -59,7 +61,7 @@ export const StudentNotesView: React.FC<StudentNotesProps> = ({
       {/* Student List Column */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-xs flex flex-col gap-2 max-h-[500px] overflow-y-auto">
         <span className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">
-          Estudiantes
+          {t('students_sidebar')}
         </span>
         {students.map(s => (
           <button
@@ -82,17 +84,17 @@ export const StudentNotesView: React.FC<StudentNotesProps> = ({
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-xs flex flex-col gap-3">
           <div className="flex items-center justify-between">
             <h3 className="font-bold text-sm text-slate-800 dark:text-slate-100 flex items-center gap-2">
-              <StickyNote size={17} className="text-amber-500" /> Observaciones de {currentStudent?.name}
+              <StickyNote size={17} className="text-amber-500" /> {t('observations')}: {currentStudent?.name}
             </h3>
             <Button onClick={handleSaveObs} variant="primary" size="sm">
-              Guardar Observación
+              {t('save_obs_btn')}
             </Button>
           </div>
           <textarea
             rows={4}
             value={obsText}
             onChange={e => setObsText(e.target.value)}
-            placeholder="Anotaciones conductuales, avances pedagógicos, compromisos con apoderados..."
+            placeholder={t('obs_ph')}
             className="w-full p-3 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-orange-500"
           />
         </div>
@@ -100,7 +102,7 @@ export const StudentNotesView: React.FC<StudentNotesProps> = ({
         {/* Reminders */}
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-xs flex flex-col gap-4">
           <h3 className="font-bold text-sm text-slate-800 dark:text-slate-100 flex items-center gap-2">
-            <Bell size={17} className="text-blue-500" /> Recordatorios Pendientes
+            <Bell size={17} className="text-blue-500" /> {t('reminders_alerts')}
           </h3>
 
           <div className="flex items-center gap-2">
@@ -108,12 +110,12 @@ export const StudentNotesView: React.FC<StudentNotesProps> = ({
               type="text"
               value={newReminderText}
               onChange={e => setNewReminderText(e.target.value)}
-              placeholder="Ej: Pedir justificativo médico o cita con apoderado..."
+              placeholder={t('add_reminder_ph')}
               className="flex-1 px-3 py-1.5 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-orange-500"
               onKeyDown={e => e.key === 'Enter' && handleAddReminder()}
             />
             <Button onClick={handleAddReminder} variant="outline" size="sm">
-              <Plus size={14} /> Añadir
+              <Plus size={14} /> {t('add')}
             </Button>
           </div>
 
@@ -134,7 +136,7 @@ export const StudentNotesView: React.FC<StudentNotesProps> = ({
               </div>
             ))}
             {studentReminders.length === 0 && (
-              <span className="text-xs text-slate-400 italic">No hay recordatorios pendientes.</span>
+              <span className="text-xs text-slate-400 italic">{t('no_reminders')}</span>
             )}
           </div>
         </div>

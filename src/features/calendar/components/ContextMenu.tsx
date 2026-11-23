@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { ClassBlock } from '../../../core/types/calendar.types';
 import { Edit3, ArrowRight, FastForward, MoveHorizontal, Trash2, BookOpen } from 'lucide-react';
+import { useTranslation } from '../../../core/i18n/useTranslation';
 
 interface ContextMenuProps {
   x: number;
@@ -25,6 +26,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
   onDelete,
   onViewLessonPlan,
 }) => {
+  const { t } = useTranslation();
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -67,7 +69,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
         className="w-full px-3 py-2 text-left flex items-center gap-2.5 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
       >
         <Edit3 size={14} className="text-blue-500" />
-        <span>Editar clase</span>
+        <span>{t('context_edit_class')}</span>
       </button>
 
       <button
@@ -78,7 +80,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
         className="w-full px-3 py-2 text-left flex items-center gap-2.5 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
       >
         <ArrowRight size={14} className="text-orange-500" />
-        <span>Recalendarizar a siguiente clase</span>
+        <span>{t('context_reschedule_next')}</span>
       </button>
 
       <button
@@ -89,7 +91,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
         className="w-full px-3 py-2 text-left flex items-center gap-2.5 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
       >
         <FastForward size={14} className="text-amber-500" />
-        <span>Recalendarizar en cascada</span>
+        <span>{t('context_reschedule_cascade')}</span>
       </button>
 
       <button
@@ -100,7 +102,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
         className="w-full px-3 py-2 text-left flex items-center gap-2.5 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
       >
         <MoveHorizontal size={14} className="text-emerald-500" />
-        <span>Mover todo el curso...</span>
+        <span>{t('context_move_course')}</span>
       </button>
 
       {(event.lessonPlanId || event.lessonPlan) && onViewLessonPlan && (
@@ -112,7 +114,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
           className="w-full px-3 py-2 text-left flex items-center gap-2.5 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
         >
           <BookOpen size={14} className="text-indigo-500" />
-          <span>Ver Plan de Lección</span>
+          <span>{t('context_view_plan')}</span>
         </button>
       )}
 
@@ -126,7 +128,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
         className="w-full px-3 py-2 text-left flex items-center gap-2.5 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
       >
         <Trash2 size={14} />
-        <span>Eliminar</span>
+        <span>{t('context_delete')}</span>
       </button>
     </div>
   );

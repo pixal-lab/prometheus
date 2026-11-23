@@ -3,6 +3,7 @@ import { Modal } from '../../../components/ui/Modal';
 import { Button } from '../../../components/ui/Button';
 import { useLessonPlannerStore } from '../store/useLessonPlannerStore';
 import { useToast } from '../../../components/ui/Toast';
+import { useTranslation } from '../../../core/i18n/useTranslation';
 import { FolderPlus } from 'lucide-react';
 
 interface CreateFolderModalProps {
@@ -16,6 +17,7 @@ export const CreateFolderModal: React.FC<CreateFolderModalProps> = ({
   onClose,
   parentPath,
 }) => {
+  const { t } = useTranslation();
   const { createFolder } = useLessonPlannerStore();
   const { showToast } = useToast();
   const [folderName, setFolderName] = useState('');
@@ -24,10 +26,10 @@ export const CreateFolderModal: React.FC<CreateFolderModalProps> = ({
   const isSubject = parentPath.length === 1;
 
   const title = isCourse
-    ? 'Crear Nuevo Curso'
+    ? t('create_folder_course')
     : isSubject
-    ? 'Crear Nueva Asignatura'
-    : 'Crear Nueva Carpeta / Unidad';
+    ? t('create_folder_subject')
+    : t('create_folder_unit');
 
   const placeholder = isCourse
     ? 'Ej: 6th Grade / 1° Medio'
@@ -50,7 +52,7 @@ export const CreateFolderModal: React.FC<CreateFolderModalProps> = ({
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div className="flex flex-col gap-1.5">
           <label className="text-xs font-bold uppercase tracking-wider text-slate-500">
-            Nombre de la carpeta:
+            {t('folder_name_label')}
           </label>
           <input
             type="text"
@@ -65,10 +67,10 @@ export const CreateFolderModal: React.FC<CreateFolderModalProps> = ({
 
         <div className="flex justify-end gap-2 pt-2 border-t border-slate-200 dark:border-slate-800">
           <Button onClick={onClose} variant="ghost" size="sm">
-            Cancelar
+            {t('cancel')}
           </Button>
           <Button type="submit" variant="primary" size="sm">
-            <FolderPlus size={16} /> Crear Carpeta
+            <FolderPlus size={16} /> {t('create')}
           </Button>
         </div>
       </form>

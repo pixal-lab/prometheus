@@ -1,6 +1,7 @@
 import React from 'react';
 import dayjs from 'dayjs';
 import { ClassBlock, SubjectConfig, DayTypeInfo } from '../../../../core/types/calendar.types';
+import { useTranslation } from '../../../../core/i18n/useTranslation';
 
 interface YearViewProps {
   currentDate: string;
@@ -12,8 +13,6 @@ interface YearViewProps {
   onDayClick: (date: string) => void;
 }
 
-const WEEKDAYS = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
-
 export const YearView: React.FC<YearViewProps> = ({
   currentDate,
   blocks,
@@ -23,6 +22,16 @@ export const YearView: React.FC<YearViewProps> = ({
   onAddEventClick,
   onDayClick,
 }) => {
+  const { t } = useTranslation();
+  const weekdays = [
+    t('mon_short').charAt(0),
+    t('tue_short').charAt(0),
+    t('wed_short').charAt(0),
+    t('thu_short').charAt(0),
+    t('fri_short').charAt(0),
+    t('sat_short').charAt(0),
+    t('sun_short').charAt(0),
+  ];
   const current = dayjs(currentDate);
   const year = current.year();
   const months = Array.from({ length: 12 }, (_, i) => dayjs(`${year}-${String(i + 1).padStart(2, '0')}-01`));
@@ -52,12 +61,12 @@ export const YearView: React.FC<YearViewProps> = ({
                 {mDate.format('MMMM')}
               </h4>
               <span className="text-[10px] font-mono text-slate-400 font-bold">
-                {monthBlocksCount > 0 ? `${monthBlocksCount} cl.` : ''}
+                {monthBlocksCount > 0 ? `${monthBlocksCount} ${t('classes_count_short')}` : ''}
               </span>
             </div>
 
             <div className="grid grid-cols-7 py-1.5 border-b border-slate-100 dark:border-slate-800 text-center text-[9px] font-bold text-slate-400">
-              {WEEKDAYS.map(wd => (
+              {weekdays.map(wd => (
                 <div key={wd}>{wd}</div>
               ))}
             </div>

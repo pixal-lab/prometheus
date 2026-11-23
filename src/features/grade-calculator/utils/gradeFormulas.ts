@@ -121,3 +121,18 @@ export function generateGradingTable(
   return rows;
 }
 
+export function splitIntoColumns<T>(items: T[], numCols: number): T[][] {
+  if (numCols <= 1) return [items];
+  const result: T[][] = [];
+  const perCol = Math.ceil(items.length / numCols);
+  for (let c = 0; c < numCols; c++) {
+    const start = c * perCol;
+    const end = Math.min(start + perCol, items.length);
+    if (start < items.length) {
+      result.push(items.slice(start, end));
+    }
+  }
+  return result;
+}
+
+

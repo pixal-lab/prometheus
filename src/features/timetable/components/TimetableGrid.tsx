@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { TimetableData, TimetableEvent, DayOfWeek, TimetableBlockType } from '../../../core/types/timetable.types';
 import { Clock, GripVertical } from 'lucide-react';
 import { useTimetableStore } from '../store/useTimetableStore';
+import { useTranslation } from '../../../core/i18n/useTranslation';
 
 interface TimetableGridProps {
   data: TimetableData;
@@ -85,6 +86,7 @@ export const TimetableGrid: React.FC<TimetableGridProps> = ({
   onMoveBlock,
   onResizeBlock,
 }) => {
+  const { t } = useTranslation();
   const { draggedPaletteItem } = useTimetableStore();
   const [dragOverDay, setDragOverDay] = useState<DayOfWeek | null>(null);
 
@@ -335,7 +337,7 @@ export const TimetableGrid: React.FC<TimetableGridProps> = ({
                   : 'text-slate-800 dark:text-slate-100'
               }`}
             >
-              {day.label}
+              {t(day.key)}
             </div>
           );
         })}

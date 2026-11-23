@@ -57,6 +57,7 @@ interface CalendarStore {
 
   setSubject: (name: string, config: SubjectConfig) => Promise<void>;
   deleteSubject: (name: string) => Promise<void>;
+  renameSubject: (oldName: string, newName: string) => Promise<void>;
   setSubjectOrder: (order: string[]) => Promise<void>;
 
   setDayType: (date: string, typeInfo: DayTypeInfo | null) => Promise<void>;
@@ -104,7 +105,7 @@ export const useCalendarStore = create<CalendarStore>((set, get) => ({
   activeSchoolYearId: 1,
   calendarDayTypes: {},
   dayColorPalette: defaultDayPalette,
-  hemisphere: (localStorage.getItem('hemisphere') as 'south' | 'north') || 'south',
+  hemisphere: (typeof localStorage !== 'undefined' ? (localStorage.getItem('hemisphere') as 'south' | 'north') : null) || 'south',
 
   currentView: 'month',
   currentDate: dayjs().format('YYYY-MM-DD'),
@@ -123,7 +124,7 @@ export const useCalendarStore = create<CalendarStore>((set, get) => ({
       const activeYearId = await storage.getItem<number>('activeSchoolYearId');
       const dayTypes = (await storage.getItem<Record<string, DayTypeInfo>>('calendarDayTypes')) || {};
       const palette = (await storage.getItem<CustomDayColor[]>('dayColorPalette')) || defaultDayPalette;
-      const hemi = (localStorage.getItem('hemisphere') as 'south' | 'north') || 'south';
+      const hemi = (typeof localStorage !== 'undefined' ? (localStorage.getItem('hemisphere') as 'south' | 'north') : null) || 'south';
 
       const finalSubjects = subs || defaultSubjects;
       const finalYears = years || defaultSchoolYears;
@@ -131,7 +132,7 @@ export const useCalendarStore = create<CalendarStore>((set, get) => ({
       // Seeding inicial de cortesía si el almacenamiento está completamente vacío
       let finalBlocks = blocks;
       if (blocks.length === 0) {
-        const hasLoadedSample = localStorage.getItem('prometheus_has_seeded_initial');
+        const hasLoadedSample = typeof localStorage !== 'undefined' ? localStorage.getItem('prometheus_has_seeded_initial') : 'true';
         if (!hasLoadedSample) {
           const cur = dayjs();
           const curMonday = cur.startOf('isoWeek');
@@ -174,7 +175,9 @@ export const useCalendarStore = create<CalendarStore>((set, get) => ({
               evaluationDetails: 'Rúbrica de fracciones y ecuaciones básicas',
             },
           ];
-          localStorage.setItem('prometheus_has_seeded_initial', 'true');
+          if (typeof localStorage !== 'undefined') {
+            localStorage.setItem('prometheus_has_seeded_initial', 'true');
+          }
           await storage.setItem('classBlocks', finalBlocks);
         }
       }
@@ -205,7 +208,9 @@ export const useCalendarStore = create<CalendarStore>((set, get) => ({
       await storage.setItem('activeSchoolYearId', get().activeSchoolYearId);
       await storage.setItem('calendarDayTypes', get().calendarDayTypes);
       await storage.setItem('dayColorPalette', get().dayColorPalette);
-      localStorage.setItem('hemisphere', get().hemisphere);
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem('hemisphere', get().hemisphere);
+      }
     } catch (err) {
       logger.error('Calendar', 'Error guardando datos', err);
     }
@@ -359,8 +364,37 @@ export const useCalendarStore = create<CalendarStore>((set, get) => ({
     const subjects = { ...get().subjects };
     delete subjects[name];
     const subjectOrder = get().subjectOrder.filter(s => s !== name);
+    const prevBlocks = get().classBlocks;
+    const classBlocks = prevBlocks.filter(b => b.subject !== name);
 
-    set({ subjects, subjectOrder });
+    set({
+      subjects,
+      subjectOrder,
+      classBlocks,
+      undoStack: [...get().undoStack, prevBlocks],
+      redoStack: [],
+    });
+    await get().saveData();
+  },
+
+  renameSubject: async (oldName, newName) => {
+    if (!oldName || !newName || oldName === newName) return;
+    const { subjects, subjectOrder, classBlocks } = get();
+    const config = subjects[oldName];
+    if (!config) return;
+
+    const newSubjects = { ...subjects };
+    delete newSubjects[oldName];
+    newSubjects[newName] = config;
+
+    const newOrder = subjectOrder.map(s => (s === oldName ? newName : s));
+    const newBlocks = classBlocks.map(b => (b.subject === oldName ? { ...b, subject: newName } : b));
+
+    set({
+      subjects: newSubjects,
+      subjectOrder: newOrder,
+      classBlocks: newBlocks,
+    });
     await get().saveData();
   },
 
@@ -404,7 +438,9 @@ export const useCalendarStore = create<CalendarStore>((set, get) => ({
 
   setHemisphere: async hemisphere => {
     set({ hemisphere });
-    localStorage.setItem('hemisphere', hemisphere);
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('hemisphere', hemisphere);
+    }
   },
 
   addSchoolYear: async yearData => {

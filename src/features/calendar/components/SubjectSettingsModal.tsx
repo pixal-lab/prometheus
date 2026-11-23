@@ -79,15 +79,15 @@ export const SubjectSettingsModal: React.FC<SubjectSettingsModalProps> = ({ isOp
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Gestión de Asignaturas y Cursos" maxWidth="lg">
+    <Modal isOpen={isOpen} onClose={onClose} title={t('subject_mgmt_title')} maxWidth="lg">
       <div className="flex flex-col gap-5">
         {/* Form to add */}
         <form onSubmit={handleAdd} className="p-3 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-col gap-2.5">
-          <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Añadir Nueva Asignatura</span>
+          <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{t('add_subject_title')}</span>
           <div className="flex items-center gap-2">
             <input
               type="text"
-              placeholder="Nombre (ej: Filosofía)"
+              placeholder={t('course_name_placeholder')}
               value={newSubjectName}
               onChange={e => setNewSubjectName(e.target.value)}
               className="flex-1 px-3 py-1.5 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500"
@@ -100,12 +100,12 @@ export const SubjectSettingsModal: React.FC<SubjectSettingsModalProps> = ({ isOp
               className="w-8 h-8 rounded-lg border border-slate-300 dark:border-slate-700 cursor-pointer bg-white dark:bg-slate-900 p-0.5 shrink-0"
             />
             <Button type="submit" variant="primary" size="sm">
-              <Plus size={14} /> Añadir
+              <Plus size={14} /> {t('add')}
             </Button>
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="text-[10px] text-slate-400 font-medium">Días lectivos:</span>
+            <span className="text-[10px] text-slate-400 font-medium">{t('teaching_days_label')}</span>
             <div className="flex items-center gap-1">
               {WEEKDAY_KEYS.map(d => (
                 <button

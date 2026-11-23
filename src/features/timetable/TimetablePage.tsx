@@ -206,10 +206,11 @@ export const TimetablePage: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-800">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100 flex items-center gap-2">
-            🕒 {t('timetable_title')}
+            <Clock size={26} className="text-orange-600 dark:text-orange-400" />
+            <span>{t('timetable_title')}</span>
           </h1>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-            Grilla horaria interactiva. Arrastra asignaturas o bloques a cualquier celda o haz doble clic para añadir.
+            {t('timetable_subtitle')}
           </p>
         </div>
 
@@ -220,7 +221,7 @@ export const TimetablePage: React.FC = () => {
               onClick={undo}
               disabled={undoStack.length === 0}
               className="p-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-              title="Deshacer (Ctrl + Z)"
+              title={`${t('undo')} (Ctrl + Z)`}
             >
               <Undo2 size={16} />
             </button>
@@ -228,7 +229,7 @@ export const TimetablePage: React.FC = () => {
               onClick={redo}
               disabled={redoStack.length === 0}
               className="p-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-              title="Rehacer (Ctrl + Y)"
+              title={`${t('redo')} (Ctrl + Y)`}
             >
               <Redo2 size={16} />
             </button>
@@ -240,7 +241,7 @@ export const TimetablePage: React.FC = () => {
             size="sm"
             title="Configurar horas de inicio y fin"
           >
-            <SlidersHorizontal size={15} /> Horas de Días
+            <SlidersHorizontal size={15} /> {t('day_hours_btn')}
           </Button>
 
           <Button
@@ -250,11 +251,11 @@ export const TimetablePage: React.FC = () => {
             className="text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 border-red-200 dark:border-red-900/50"
             title="Borrar todos los eventos del horario"
           >
-            <Trash2 size={15} /> Vaciar Horario
+            <Trash2 size={15} /> {t('clear_timetable_btn')}
           </Button>
 
           <Button onClick={() => window.print()} variant="outline" size="sm" title="Imprimir horario">
-            <Printer size={15} /> Imprimir
+            <Printer size={15} /> {t('print')}
           </Button>
 
           <Button
@@ -262,7 +263,7 @@ export const TimetablePage: React.FC = () => {
             variant="primary"
             size="sm"
           >
-            <Plus size={15} /> Añadir Bloque
+            <Plus size={15} /> {t('add_block_btn')}
           </Button>
         </div>
       </div>
@@ -275,17 +276,17 @@ export const TimetablePage: React.FC = () => {
             <div className="flex items-center justify-between">
               <h3 className="font-bold text-xs uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
                 <GraduationCap size={15} className="text-orange-600" />
-                Asignaturas del Curso
+                {t('course_subjects_title')}
               </h3>
-              <span className="text-[10px] text-slate-400">Arrastrable</span>
+              <span className="text-[10px] text-slate-400">{t('draggable_badge')}</span>
             </div>
             <p className="text-xs text-slate-400">
-              Arrastra una asignatura a cualquier día y hora de la grilla:
+              {t('drag_subject_hint')}
             </p>
 
             <div className="flex flex-col gap-1.5 max-h-[220px] overflow-y-auto pr-1">
               {orderedSubjects.length === 0 ? (
-                <span className="text-xs text-slate-400 italic">No hay asignaturas configuradas</span>
+                <span className="text-xs text-slate-400 italic">{t('no_subjects_configured')}</span>
               ) : (
                 orderedSubjects.map(sub => (
                   <div
@@ -315,10 +316,10 @@ export const TimetablePage: React.FC = () => {
           {/* Non-Course Blocks Palette */}
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-xs flex flex-col gap-3">
             <h3 className="font-bold text-xs uppercase tracking-wider text-slate-500">
-              Bloques No Lectivos
+              {t('non_course_blocks_title')}
             </h3>
             <p className="text-xs text-slate-400">
-              Arrastra o pulsa para añadir a la jornada:
+              {t('drag_block_hint')}
             </p>
 
             <div className="flex flex-col gap-2">
@@ -337,7 +338,7 @@ export const TimetablePage: React.FC = () => {
               >
                 <div className="w-3.5 h-3.5 rounded-full shrink-0" style={{ backgroundColor: nonCourseConfigs.break }} />
                 <Coffee size={15} className="text-slate-500" />
-                <span>Recreo (30 min)</span>
+                <span>{t('break_duration')}</span>
               </div>
 
               <div
@@ -355,7 +356,7 @@ export const TimetablePage: React.FC = () => {
               >
                 <div className="w-3.5 h-3.5 rounded-full shrink-0" style={{ backgroundColor: nonCourseConfigs.lunch }} />
                 <Utensils size={15} className="text-slate-500" />
-                <span>Almuerzo (1 hora)</span>
+                <span>{t('lunch_duration')}</span>
               </div>
 
               <div
@@ -373,7 +374,7 @@ export const TimetablePage: React.FC = () => {
               >
                 <div className="w-3.5 h-3.5 rounded-full shrink-0" style={{ backgroundColor: nonCourseConfigs.planning }} />
                 <BookOpen size={15} className="text-slate-500" />
-                <span>Planificación</span>
+                <span>{t('planning_block')}</span>
               </div>
 
               <div
@@ -391,7 +392,7 @@ export const TimetablePage: React.FC = () => {
               >
                 <div className="w-3.5 h-3.5 rounded-full shrink-0" style={{ backgroundColor: nonCourseConfigs.special }} />
                 <Sparkles size={15} className="text-slate-500" />
-                <span>Clase Especial</span>
+                <span>{t('special_duration')}</span>
               </div>
             </div>
           </div>
@@ -399,7 +400,7 @@ export const TimetablePage: React.FC = () => {
           <div className="p-4 bg-orange-50/60 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-900 rounded-2xl text-xs text-orange-900 dark:text-orange-200 flex items-start gap-2.5">
             <Clock size={16} className="shrink-0 text-orange-600 mt-0.5" />
             <p>
-              <strong>Atajos:</strong> Haz clic derecho sobre cualquier bloque del horario para editarlo, duplicarlo o eliminarlo. Usa <kbd className="font-mono bg-orange-100 dark:bg-orange-900 px-1 rounded">Ctrl + Z</kbd> para deshacer.
+              <strong>{t('shortcuts')}:</strong> {t('shortcuts_timetable_hint')}
             </p>
           </div>
         </div>
@@ -473,17 +474,16 @@ export const TimetablePage: React.FC = () => {
         <Modal
           isOpen={isClearModalOpen}
           onClose={() => setIsClearModalOpen(false)}
-          title="¿Vaciar Horario Completo?"
+          title={t('clear_timetable_title')}
           maxWidth="sm"
         >
           <div className="flex flex-col gap-4">
             <p className="text-xs text-slate-600 dark:text-slate-300">
-              ¿Estás seguro de que deseas eliminar <strong>todos los bloques</strong> del horario semanal?
-              Esta acción se puede deshacer con <kbd className="font-mono bg-slate-100 dark:bg-slate-800 px-1 rounded">Ctrl + Z</kbd>.
+              {t('clear_timetable_msg')}
             </p>
             <div className="flex justify-end gap-2 pt-2 border-t border-slate-200 dark:border-slate-800">
               <Button onClick={() => setIsClearModalOpen(false)} variant="ghost" size="sm">
-                Cancelar
+                {t('cancel')}
               </Button>
               <Button
                 onClick={async () => {
@@ -495,7 +495,7 @@ export const TimetablePage: React.FC = () => {
                 size="sm"
                 className="bg-red-600 hover:bg-red-700 text-white"
               >
-                <Trash2 size={15} /> Confirmar y Vaciar
+                <Trash2 size={15} /> {t('confirm_clear_btn')}
               </Button>
             </div>
           </div>

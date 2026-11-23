@@ -108,7 +108,7 @@ export const CsvImportModal: React.FC<CsvImportModalProps> = ({ isOpen, onClose,
             onClick={handleImport}
             disabled={parsedNames.length === 0}
           >
-            <Check size={16} /> Importar {parsedNames.length} Estudiantes
+            <Check size={16} /> {t('import_students_btn')}
           </Button>
         </div>
       </div>

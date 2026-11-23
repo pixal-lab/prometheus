@@ -3,6 +3,7 @@ import dayjs from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';
 import { ClassBlock, SubjectConfig, DayTypeInfo } from '../../../../core/types/calendar.types';
 import { Plus, Award } from 'lucide-react';
+import { useTranslation } from '../../../../core/i18n/useTranslation';
 
 dayjs.extend(isoWeek);
 
@@ -29,6 +30,7 @@ export const WeekView: React.FC<WeekViewProps> = ({
   onContextMenu,
   onDropBlock,
 }) => {
+  const { t } = useTranslation();
   const [dragOverDate, setDragOverDate] = useState<string | null>(null);
   const current = dayjs(currentDate);
   // Find Monday of the current week (ISO week starts on Monday)
@@ -144,7 +146,7 @@ export const WeekView: React.FC<WeekViewProps> = ({
 
               {dayBlocks.length === 0 && (
                 <span className="text-xs text-slate-400 italic text-center py-8">
-                  Sin clases programadas
+                  {t('no_classes_day')}
                 </span>
               )}
             </div>

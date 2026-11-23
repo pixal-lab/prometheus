@@ -2,6 +2,7 @@ import React from 'react';
 import { Modal } from '../../../components/ui/Modal';
 import { Button } from '../../../components/ui/Button';
 import { AlertCircle, ArrowRight, FastForward } from 'lucide-react';
+import { useTranslation } from '../../../core/i18n/useTranslation';
 
 interface MoveConflictModalProps {
   isOpen: boolean;
@@ -20,8 +21,9 @@ export const MoveConflictModal: React.FC<MoveConflictModalProps> = ({
   onMoveSingle,
   onMoveCascade,
 }) => {
+  const { t } = useTranslation();
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Conflicto de Evento en Calendario" maxWidth="md">
+    <Modal isOpen={isOpen} onClose={onClose} title={t('move_conflict_title')} maxWidth="md">
       <div className="flex flex-col gap-4">
         <div className="flex items-start gap-3 p-3.5 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-xl text-amber-900 dark:text-amber-200 text-xs">
           <AlertCircle className="shrink-0 text-amber-600 mt-0.5" size={16} />
@@ -41,10 +43,10 @@ export const MoveConflictModal: React.FC<MoveConflictModalProps> = ({
             <ArrowRight size={18} className="text-orange-600 shrink-0" />
             <div>
               <span className="font-bold text-xs text-slate-800 dark:text-slate-100 block">
-                Mover solo este evento
+                {t('move_single_event')}
               </span>
               <span className="text-[11px] text-slate-400">
-                Solo se desplazará esta clase; el resto del cronograma permanecerá inalterado.
+                {t('move_single_event_desc')}
               </span>
             </div>
           </button>
@@ -59,10 +61,10 @@ export const MoveConflictModal: React.FC<MoveConflictModalProps> = ({
             <FastForward size={18} className="text-amber-600 shrink-0" />
             <div>
               <span className="font-bold text-xs text-slate-800 dark:text-slate-100 block">
-                Mover todos los eventos subsiguientes
+                {t('move_cascade_events')}
               </span>
               <span className="text-[11px] text-slate-400">
-                Empuja en cascada todas las clases posteriores de este curso hacia adelante.
+                {t('move_cascade_events_desc')}
               </span>
             </div>
           </button>
@@ -70,7 +72,7 @@ export const MoveConflictModal: React.FC<MoveConflictModalProps> = ({
 
         <div className="flex justify-end pt-2 border-t border-slate-100 dark:border-slate-800">
           <Button onClick={onClose} variant="ghost" size="sm">
-            Cancelar
+            {t('cancel')}
           </Button>
         </div>
       </div>

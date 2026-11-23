@@ -206,14 +206,14 @@ export const EventModal: React.FC<EventModalProps> = ({
       <Modal
         isOpen={isOpen}
         onClose={onClose}
-        title={event ? 'Editar Clase / Evento' : t('create_event')}
+        title={event ? t('edit_event_title') : t('create_event')}
         maxWidth="lg"
       >
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           {isRecurringInstance && (
             <div className="p-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-xl text-xs flex flex-col gap-2">
               <span className="font-bold text-amber-900 dark:text-amber-200">
-                Esta clase es una ocurrencia de una serie repetida.
+                {t('recurring_occurrence_alert')}
               </span>
               <div className="flex items-center gap-3">
                 <label className="flex items-center gap-1.5 cursor-pointer text-slate-700 dark:text-slate-300">
@@ -224,7 +224,7 @@ export const EventModal: React.FC<EventModalProps> = ({
                     checked={editRecurringScope === 'single'}
                     onChange={() => setEditRecurringScope('single')}
                   />
-                  <span>Solo esta fecha (crear clase individual)</span>
+                  <span>{t('recurring_single_opt')}</span>
                 </label>
                 <label className="flex items-center gap-1.5 cursor-pointer text-slate-700 dark:text-slate-300">
                   <input
@@ -234,7 +234,7 @@ export const EventModal: React.FC<EventModalProps> = ({
                     checked={editRecurringScope === 'series'}
                     onChange={() => setEditRecurringScope('series')}
                   />
-                  <span>Toda la serie recurrente</span>
+                  <span>{t('recurring_series_opt')}</span>
                 </label>
               </div>
             </div>
@@ -251,7 +251,7 @@ export const EventModal: React.FC<EventModalProps> = ({
 
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
-                Color
+                {t('color')}
               </label>
               <div className="flex items-center gap-2">
                 <input
@@ -269,7 +269,7 @@ export const EventModal: React.FC<EventModalProps> = ({
             label={t('event_title')}
             value={topic}
             onChange={e => setTopic(e.target.value)}
-            placeholder="Ej: Ecuaciones de primer grado"
+            placeholder={t('topic_placeholder')}
             required
           />
 
@@ -285,7 +285,7 @@ export const EventModal: React.FC<EventModalProps> = ({
           <div className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex flex-col gap-2.5">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2">
-                <BookOpen size={15} className="text-blue-500" /> Plan de Lección
+                <BookOpen size={15} className="text-blue-500" /> {t('lesson_plans_menu')}
               </span>
               {!lessonPlanId ? (
                 <button
@@ -293,7 +293,7 @@ export const EventModal: React.FC<EventModalProps> = ({
                   onClick={() => setIsPickerOpen(true)}
                   className="text-xs text-orange-600 dark:text-orange-400 font-bold hover:underline"
                 >
-                  + Vincular Plan de Lección
+                  {t('link_plan_action')}
                 </button>
               ) : (
                 <button
@@ -302,7 +302,7 @@ export const EventModal: React.FC<EventModalProps> = ({
                   className="text-xs text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 flex items-center gap-1"
                 >
                   {showPlanEditor ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                  <span>{showPlanEditor ? 'Ocultar detalles' : 'Ver / Editar detalles'}</span>
+                  <span>{showPlanEditor ? t('hide_details') : t('view_edit_details')}</span>
                 </button>
               )}
             </div>
@@ -316,7 +316,7 @@ export const EventModal: React.FC<EventModalProps> = ({
                   type="button"
                   onClick={handleUnlinkLessonPlan}
                   className="p-1 hover:bg-blue-100 dark:hover:bg-blue-900 rounded text-blue-700 dark:text-blue-300"
-                  title="Desvincular plan"
+                  title={t('unlink_plan')}
                 >
                   <X size={14} />
                 </button>
@@ -372,7 +372,7 @@ export const EventModal: React.FC<EventModalProps> = ({
                 rows={2}
                 value={evaluationDetails}
                 onChange={e => setEvaluationDetails(e.target.value)}
-                placeholder="Rúbrica, puntaje, formato de evaluación (formativa o sumativa)..."
+                placeholder={t('eval_rubric_placeholder')}
                 className="w-full p-2.5 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-orange-500"
               />
             )}
@@ -395,25 +395,25 @@ export const EventModal: React.FC<EventModalProps> = ({
               <div className="flex flex-col gap-3 pt-1">
                 <div className="grid grid-cols-2 gap-3">
                   <Select
-                    label="Frecuencia"
+                    label={t('frequency')}
                     value={recurrenceRule.type}
                     onChange={e => setRecurrenceRule({ ...recurrenceRule, type: e.target.value as any })}
                     options={[
-                      { value: 'daily', label: 'Diario' },
-                      { value: 'weekly', label: 'Semanal' },
-                      { value: 'monthly', label: 'Mensual' },
-                      { value: 'yearly', label: 'Anual' },
+                      { value: 'daily', label: t('daily') },
+                      { value: 'weekly', label: t('weekly') },
+                      { value: 'monthly', label: t('monthly') },
+                      { value: 'yearly', label: t('yearly') },
                     ]}
                   />
 
                   <Select
-                    label="Termina"
+                    label={t('ends')}
                     value={recurrenceRule.ends}
                     onChange={e => setRecurrenceRule({ ...recurrenceRule, ends: e.target.value as any })}
                     options={[
-                      { value: 'afterOccurrences', label: 'Después de' },
-                      { value: 'onDate', label: 'En la fecha' },
-                      { value: 'never', label: 'Nunca' },
+                      { value: 'afterOccurrences', label: t('after_occurrences') },
+                      { value: 'onDate', label: t('on_date') },
+                      { value: 'never', label: t('never') },
                     ]}
                   />
                 </div>
@@ -421,7 +421,7 @@ export const EventModal: React.FC<EventModalProps> = ({
                 {/* Specific days for weekly */}
                 {recurrenceRule.type === 'weekly' && (
                   <div className="flex flex-col gap-1.5">
-                    <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">Repetir en:</span>
+                    <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">{t('repeat_on')}</span>
                     <div className="flex items-center gap-1.5">
                       {WEEKDAYS_RECURRENCE.map(wd => {
                         const isSelected = (recurrenceRule.days || []).includes(wd.day);
@@ -447,7 +447,7 @@ export const EventModal: React.FC<EventModalProps> = ({
                 {/* Ends options */}
                 {recurrenceRule.ends === 'afterOccurrences' && (
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-slate-500">Repetir durante</span>
+                    <span className="text-xs text-slate-500">{t('repeat_for')}</span>
                     <input
                       type="number"
                       min={1}
@@ -458,13 +458,13 @@ export const EventModal: React.FC<EventModalProps> = ({
                       }
                       className="w-20 px-2 py-1 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 font-mono"
                     />
-                    <span className="text-xs text-slate-500">clases</span>
+                    <span className="text-xs text-slate-500">{t('classes_unit')}</span>
                   </div>
                 )}
 
                 {recurrenceRule.ends === 'onDate' && (
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-slate-500">Hasta la fecha:</span>
+                    <span className="text-xs text-slate-500">{t('until_date')}</span>
                     <input
                       type="date"
                       value={recurrenceRule.endDate || ''}
@@ -486,7 +486,7 @@ export const EventModal: React.FC<EventModalProps> = ({
               rows={2}
               value={notes}
               onChange={e => setNotes(e.target.value)}
-              placeholder="Recordatorios o instrucciones de clase..."
+              placeholder={t('class_notes_placeholder')}
               className="w-full p-2.5 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-orange-500"
             />
           </div>

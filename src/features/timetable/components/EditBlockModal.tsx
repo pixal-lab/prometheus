@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Trash2, Copy } from 'lucide-react';
 import { Modal } from '../../../components/ui/Modal';
 import { Button } from '../../../components/ui/Button';
 import { Input } from '../../../components/ui/Input';
@@ -77,10 +78,10 @@ export const EditBlockModal: React.FC<EditBlockModalProps> = ({ isOpen, onClose,
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Editar Bloque de Horario">
+    <Modal isOpen={isOpen} onClose={onClose} title={t('edit_block_title')}>
       <form onSubmit={handleSave} className="flex flex-col gap-4">
         <Input
-          label="Título del Bloque"
+          label={t('block_title')}
           value={title}
           onChange={e => setTitle(e.target.value)}
           required
@@ -88,14 +89,14 @@ export const EditBlockModal: React.FC<EditBlockModalProps> = ({ isOpen, onClose,
 
         <div className="grid grid-cols-2 gap-3">
           <Input
-            label="Hora de Inicio"
+            label={t('start_time')}
             type="time"
             value={startTime}
             onChange={e => setStartTime(e.target.value)}
             required
           />
           <Input
-            label="Hora de Fin"
+            label={t('end_time')}
             type="time"
             value={endTime}
             onChange={e => setEndTime(e.target.value)}
@@ -105,21 +106,21 @@ export const EditBlockModal: React.FC<EditBlockModalProps> = ({ isOpen, onClose,
 
         <div className="grid grid-cols-2 gap-3">
           <Select
-            label="Tipo de Bloque"
+            label={t('block_type')}
             value={type}
             onChange={e => setType(e.target.value as TimetableBlockType)}
             options={[
-              { value: 'course', label: 'Asignatura / Curso' },
-              { value: 'break', label: 'Recreo' },
-              { value: 'lunch', label: 'Almuerzo' },
-              { value: 'planning', label: 'Planificación' },
-              { value: 'special', label: 'Especial' },
+              { value: 'course', label: t('course_subject_type') },
+              { value: 'break', label: t('break_block') },
+              { value: 'lunch', label: t('lunch_block') },
+              { value: 'planning', label: t('planning_block') },
+              { value: 'special', label: t('special_block') },
             ]}
           />
 
           <div className="flex flex-col gap-1.5">
             <label className="text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
-              Color
+              {t('color')}
             </label>
             <div className="flex items-center gap-2">
               <input
@@ -135,24 +136,24 @@ export const EditBlockModal: React.FC<EditBlockModalProps> = ({ isOpen, onClose,
 
         <div className="flex flex-col gap-1.5">
           <label className="text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
-            Notas
+            {t('notes')}
           </label>
           <textarea
             rows={2}
             value={notes}
             onChange={e => setNotes(e.target.value)}
-            placeholder="Información adicional del bloque..."
+            placeholder={t('block_notes_ph')}
             className="w-full p-2.5 text-sm rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500"
           />
         </div>
 
         <div className="flex items-center justify-between pt-4 border-t border-slate-200 dark:border-slate-800">
           <div className="flex items-center gap-2">
-            <Button type="button" variant="danger" size="sm" onClick={handleDelete}>
-              {t('delete')}
+            <Button type="button" variant="danger" size="sm" onClick={handleDelete} title={t('delete_block')}>
+              <Trash2 size={15} />
             </Button>
-            <Button type="button" variant="outline" size="sm" onClick={handleDuplicate}>
-              {t('duplicate')}
+            <Button type="button" variant="outline" size="sm" onClick={handleDuplicate} title={t('duplicate_block')}>
+              <Copy size={15} />
             </Button>
           </div>
           <div className="flex items-center gap-2">

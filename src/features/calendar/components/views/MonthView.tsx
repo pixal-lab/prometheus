@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import dayjs from 'dayjs';
 import { ClassBlock, SubjectConfig, DayTypeInfo } from '../../../../core/types/calendar.types';
 import { Plus, Award, AlertCircle } from 'lucide-react';
+import { useTranslation } from '../../../../core/i18n/useTranslation';
 
 interface MonthViewProps {
   currentDate: string; // YYYY-MM-DD
@@ -15,8 +16,6 @@ interface MonthViewProps {
   onDropBlock?: (blockId: string, targetDate: string) => void;
 }
 
-const WEEKDAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
-
 export const MonthView: React.FC<MonthViewProps> = ({
   currentDate,
   blocks,
@@ -28,6 +27,16 @@ export const MonthView: React.FC<MonthViewProps> = ({
   onContextMenu,
   onDropBlock,
 }) => {
+  const { t } = useTranslation();
+  const weekdays = [
+    t('monday'),
+    t('tuesday'),
+    t('wednesday'),
+    t('thursday'),
+    t('friday'),
+    t('saturday'),
+    t('sunday'),
+  ];
   const [dragOverDate, setDragOverDate] = useState<string | null>(null);
   const current = dayjs(currentDate);
   const startOfMonth = current.startOf('month');
@@ -48,7 +57,7 @@ export const MonthView: React.FC<MonthViewProps> = ({
     <div className="flex flex-col bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs overflow-hidden">
       {/* Weekday headers */}
       <div className="grid grid-cols-7 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60">
-        {WEEKDAYS.map((wd, i) => (
+        {weekdays.map((wd, i) => (
           <div
             key={wd}
             className={`py-2.5 text-center text-xs font-bold ${i >= 5 ? 'text-slate-400' : 'text-slate-700 dark:text-slate-200'

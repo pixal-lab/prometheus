@@ -40,7 +40,7 @@ export const AttendanceSheet: React.FC<AttendanceSheetProps> = ({ students, atte
       <div className="flex flex-wrap items-center justify-between gap-4 p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs">
         <div className="flex items-center gap-3">
           <label className="text-xs font-bold uppercase tracking-wider text-slate-500">
-            Fecha de Asistencia:
+            {t('attendance_date_label')}
           </label>
           <input
             type="date"
@@ -52,7 +52,7 @@ export const AttendanceSheet: React.FC<AttendanceSheetProps> = ({ students, atte
 
         <div className="flex items-center gap-2">
           <Button onClick={handleMarkAllPresent} variant="outline" size="sm">
-            <CheckCheck size={16} className="text-emerald-600" /> Marcar Todos Presentes
+            <CheckCheck size={16} className="text-emerald-600" /> {t('mark_all_present')}
           </Button>
         </div>
       </div>
@@ -60,19 +60,19 @@ export const AttendanceSheet: React.FC<AttendanceSheetProps> = ({ students, atte
       {/* Summary Chips */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-xl text-center">
-          <span className="text-xs font-semibold text-emerald-800 dark:text-emerald-200 block">Presentes</span>
+          <span className="text-xs font-semibold text-emerald-800 dark:text-emerald-200 block">{t('present_plural')}</span>
           <span className="text-xl font-bold font-mono text-emerald-600 dark:text-emerald-400">{presentCount}</span>
         </div>
         <div className="p-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 rounded-xl text-center">
-          <span className="text-xs font-semibold text-rose-800 dark:text-rose-200 block">Ausentes</span>
+          <span className="text-xs font-semibold text-rose-800 dark:text-rose-200 block">{t('absent_plural')}</span>
           <span className="text-xl font-bold font-mono text-rose-600 dark:text-rose-400">{absentCount}</span>
         </div>
         <div className="p-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-xl text-center">
-          <span className="text-xs font-semibold text-amber-800 dark:text-amber-200 block">Atrasos</span>
+          <span className="text-xs font-semibold text-amber-800 dark:text-amber-200 block">{t('late_plural')}</span>
           <span className="text-xl font-bold font-mono text-amber-600 dark:text-amber-400">{lateCount}</span>
         </div>
         <div className="p-3 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 rounded-xl text-center">
-          <span className="text-xs font-semibold text-blue-800 dark:text-blue-200 block">Justificados</span>
+          <span className="text-xs font-semibold text-blue-800 dark:text-blue-200 block">{t('excused_plural')}</span>
           <span className="text-xl font-bold font-mono text-blue-600 dark:text-blue-400">{excusedCount}</span>
         </div>
       </div>
@@ -83,8 +83,8 @@ export const AttendanceSheet: React.FC<AttendanceSheetProps> = ({ students, atte
           <thead className="bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-800">
             <tr>
               <th className="py-3 px-4 font-bold text-slate-700 dark:text-slate-300 w-12 text-center">#</th>
-              <th className="py-3 px-4 font-bold text-slate-700 dark:text-slate-300">Estudiante</th>
-              <th className="py-3 px-4 font-bold text-slate-700 dark:text-slate-300 text-center">Estado de Asistencia</th>
+              <th className="py-3 px-4 font-bold text-slate-700 dark:text-slate-300">{t('student_col')}</th>
+              <th className="py-3 px-4 font-bold text-slate-700 dark:text-slate-300 text-center">{t('attendance_status_col')}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">

@@ -1,6 +1,7 @@
 import React from 'react';
 import dayjs from 'dayjs';
 import { ClassBlock, SubjectConfig, DayTypeInfo } from '../../../../core/types/calendar.types';
+import { useTranslation } from '../../../../core/i18n/useTranslation';
 
 interface QuarterViewProps {
   currentDate: string;
@@ -12,8 +13,6 @@ interface QuarterViewProps {
   onDayClick: (date: string) => void;
 }
 
-const WEEKDAYS = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
-
 export const QuarterView: React.FC<QuarterViewProps> = ({
   currentDate,
   blocks,
@@ -23,6 +22,16 @@ export const QuarterView: React.FC<QuarterViewProps> = ({
   onAddEventClick,
   onDayClick,
 }) => {
+  const { t } = useTranslation();
+  const weekdays = [
+    t('mon_short').charAt(0),
+    t('tue_short').charAt(0),
+    t('wed_short').charAt(0),
+    t('thu_short').charAt(0),
+    t('fri_short').charAt(0),
+    t('sat_short').charAt(0),
+    t('sun_short').charAt(0),
+  ];
   const current = dayjs(currentDate);
   // Find quarter starting month: month 0-2 (Q1), 3-5 (Q2), 6-8 (Q3), 9-11 (Q4)
   const quarterMonthStart = Math.floor(current.month() / 3) * 3;
@@ -51,13 +60,13 @@ export const QuarterView: React.FC<QuarterViewProps> = ({
                 {mDate.format('MMMM YYYY')}
               </h3>
               <span className="text-xs font-mono text-slate-400">
-                {blocks.filter(b => b.date.startsWith(mDate.format('YYYY-MM'))).length} clases
+                {blocks.filter(b => b.date.startsWith(mDate.format('YYYY-MM'))).length} {t('classes_count')}
               </span>
             </div>
 
             {/* Weekdays */}
             <div className="grid grid-cols-7 py-2 border-b border-slate-100 dark:border-slate-800 text-center text-[10px] font-bold text-slate-400">
-              {WEEKDAYS.map(wd => (
+              {weekdays.map(wd => (
                 <div key={wd}>{wd}</div>
               ))}
             </div>

@@ -5,7 +5,7 @@ import { Input } from '../../../components/ui/Input';
 import { Course, CategoryWeight } from '../../../core/types/gradebook.types';
 import { useGradebookStore } from '../store/useGradebookStore';
 import { useToast } from '../../../components/ui/Toast';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, Check } from 'lucide-react';
 import { useTranslation } from '../../../core/i18n/useTranslation';
 
 interface CategoryWeightsModalProps {
@@ -55,14 +55,14 @@ export const CategoryWeightsModal: React.FC<CategoryWeightsModalProps> = ({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={`Ponderaciones - ${course.name}`}>
+    <Modal isOpen={isOpen} onClose={onClose} title={`${t('weights_modal_title')} - ${course.name}`}>
       <div className="flex flex-col gap-5">
         <div className="flex items-center justify-between">
           <p className="text-xs text-slate-500">
-            Define las categorías de evaluación y sus porcentajes para el promedio ponderado.
+            {t('weights_desc')}
           </p>
           <Button onClick={handleAdd} variant="outline" size="sm">
-            <Plus size={14} /> Añadir
+            <Plus size={14} /> {t('add')}
           </Button>
         </div>
 
@@ -73,7 +73,7 @@ export const CategoryWeightsModal: React.FC<CategoryWeightsModalProps> = ({
                 type="text"
                 value={cat.name}
                 onChange={e => handleChange(cat.id, 'name', e.target.value)}
-                placeholder="Nombre categoría"
+                placeholder={t('cat_name_ph')}
                 className="flex-1 px-3 py-1.5 text-sm rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500"
               />
               <div className="flex items-center gap-1 w-24">
@@ -90,7 +90,7 @@ export const CategoryWeightsModal: React.FC<CategoryWeightsModalProps> = ({
               <button
                 onClick={() => handleDelete(cat.id)}
                 className="p-1.5 text-slate-400 hover:text-rose-600 transition-colors"
-                title="Eliminar"
+                title={t('delete')}
               >
                 <Trash2 size={16} />
               </button>
@@ -100,15 +100,20 @@ export const CategoryWeightsModal: React.FC<CategoryWeightsModalProps> = ({
 
         {/* Sum Indicator */}
         <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 text-xs font-semibold">
-          <span>Suma total de ponderaciones:</span>
+          <span>{t('total_weights_sum')}</span>
           <span
-            className={`font-mono text-sm ${
+            className={`font-mono text-sm inline-flex items-center gap-1 ${
               totalWeight === 100
                 ? 'text-emerald-600 dark:text-emerald-400 font-bold'
                 : 'text-amber-600 dark:text-amber-400'
             }`}
           >
-            {totalWeight}% {totalWeight === 100 ? '✓' : '(Se recomienda 100%)'}
+            <span>{totalWeight}%</span>
+            {totalWeight === 100 ? (
+              <Check size={15} className="stroke-[3]" />
+            ) : (
+              <span>({t('recommended_100')})</span>
+            )}
           </span>
         </div>
 

@@ -78,20 +78,20 @@ export const DayTypeModal: React.FC<DayTypeModalProps> = ({ isOpen, onClose, dat
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={`Ajustes de Jornada (${date})`} maxWidth="md">
+    <Modal isOpen={isOpen} onClose={onClose} title={`${t('day_settings_title')} (${date})`} maxWidth="md">
       <div className="flex flex-col gap-5">
         {/* Color Palette Section */}
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
             <label className="text-xs font-bold uppercase tracking-wider text-slate-500">
-              Color y Tipo de Jornada
+              {t('day_color_type')}
             </label>
             <button
               type="button"
               onClick={() => setIsAddingColor(prev => !prev)}
               className="text-xs text-orange-600 dark:text-orange-400 font-bold hover:underline"
             >
-              {isAddingColor ? 'Cancelar' : '+ Añadir Color'}
+              {isAddingColor ? t('cancel') : t('add_color_btn')}
             </button>
           </div>
 
@@ -106,14 +106,14 @@ export const DayTypeModal: React.FC<DayTypeModalProps> = ({ isOpen, onClose, dat
               />
               <input
                 type="text"
-                placeholder="Nombre de la jornada (ej: Feria Científica)"
+                placeholder={t('day_name_placeholder')}
                 value={newColorLabel}
                 onChange={e => setNewColorLabel(e.target.value)}
                 className="flex-1 px-2.5 py-1 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900"
                 required
               />
               <Button type="submit" variant="primary" size="sm">
-                Guardar
+                {t('save')}
               </Button>
             </form>
           )}
@@ -165,13 +165,13 @@ export const DayTypeModal: React.FC<DayTypeModalProps> = ({ isOpen, onClose, dat
         {/* Day Note Input */}
         <div className="flex flex-col gap-1.5">
           <label className="text-xs font-bold uppercase tracking-wider text-slate-500">
-            Nota / Recordatorio del Día
+            {t('add_day_note')}
           </label>
           <input
             type="text"
             value={note}
             onChange={e => setNote(e.target.value)}
-            placeholder="Ej: Aniversario del Colegio / Día de la Ciencia"
+            placeholder={t('day_name_placeholder')}
             className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500"
           />
         </div>
@@ -179,7 +179,7 @@ export const DayTypeModal: React.FC<DayTypeModalProps> = ({ isOpen, onClose, dat
         {/* Footer Buttons */}
         <div className="flex items-center justify-between pt-3 border-t border-slate-200 dark:border-slate-800">
           <Button type="button" variant="ghost" size="sm" onClick={handleClear} className="text-rose-600">
-            <Trash2 size={15} /> Limpiar Día
+            <Trash2 size={15} /> {t('clear_day_type')}
           </Button>
 
           <div className="flex items-center gap-2">

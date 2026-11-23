@@ -1,4 +1,7 @@
 import { create } from 'zustand';
+import dayjs from 'dayjs';
+import 'dayjs/locale/es';
+import 'dayjs/locale/en';
 import { translations } from './translations';
 import { Language } from '../types/common.types';
 
@@ -9,15 +12,23 @@ interface I18nStore {
 }
 
 const getInitialLanguage = (): Language => {
-  const saved = localStorage.getItem('prometheus-lite-lang');
-  if (saved === 'en' || saved === 'es') return saved;
+  if (typeof localStorage !== 'undefined') {
+    const saved = localStorage.getItem('prometheus-lite-lang');
+    if (saved === 'en' || saved === 'es') return saved;
+  }
   return 'es';
 };
 
+const initialLang = getInitialLanguage();
+dayjs.locale(initialLang);
+
 export const useTranslation = create<I18nStore>((set, get) => ({
-  language: getInitialLanguage(),
+  language: initialLang,
   setLanguage: (lang: Language) => {
-    localStorage.setItem('prometheus-lite-lang', lang);
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('prometheus-lite-lang', lang);
+    }
+    dayjs.locale(lang);
     set({ language: lang });
   },
   t: (key: string, fallback?: string) => {
@@ -25,4 +36,3 @@ export const useTranslation = create<I18nStore>((set, get) => ({
     return translations[lang]?.[key] || fallback || key;
   },
 }));
-

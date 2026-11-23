@@ -135,11 +135,11 @@ export const LessonEditor: React.FC<LessonEditorProps> = ({ lesson, path }) => {
             TXT
           </Button>
 
-          <Button onClick={handleSaveTemplate} variant="ghost" size="sm" title="Guardar como Plantilla">
+          <Button onClick={handleSaveTemplate} variant="ghost" size="sm" title={t('save_as_template')}>
             <Bookmark size={15} />
           </Button>
 
-          <Button onClick={handleDelete} variant="ghost" size="sm" className="text-rose-600" title="Eliminar lección">
+          <Button onClick={handleDelete} variant="ghost" size="sm" className="text-rose-600" title={t('delete')}>
             <Trash2 size={15} />
           </Button>
         </div>
@@ -149,7 +149,7 @@ export const LessonEditor: React.FC<LessonEditorProps> = ({ lesson, path }) => {
       {templates.length > 0 && (
         <div className="flex items-center gap-2 p-2.5 bg-slate-50 dark:bg-slate-800/50 rounded-xl text-xs">
           <Bookmark size={14} className="text-orange-600" />
-          <span className="font-semibold text-slate-600 dark:text-slate-400">Usar Plantilla:</span>
+          <span className="font-semibold text-slate-600 dark:text-slate-400">{t('use_template')}</span>
           <div className="flex flex-wrap gap-1.5">
             {templates.map(tpl => (
               <button
@@ -174,7 +174,7 @@ export const LessonEditor: React.FC<LessonEditorProps> = ({ lesson, path }) => {
             rows={3}
             value={content.objectives}
             onChange={e => handleChange('objectives', e.target.value)}
-            placeholder="¿Qué aprenderán los estudiantes en esta sesión?"
+            placeholder={t('objectives_ph')}
             className="w-full p-3 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500 resize-y"
           />
         </div>
@@ -187,7 +187,7 @@ export const LessonEditor: React.FC<LessonEditorProps> = ({ lesson, path }) => {
             rows={3}
             value={content.readings}
             onChange={e => handleChange('readings', e.target.value)}
-            placeholder="Libros, páginas, enlaces o recursos de consulta..."
+            placeholder={t('readings_ph')}
             className="w-full p-3 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500 resize-y"
           />
         </div>
@@ -196,7 +196,7 @@ export const LessonEditor: React.FC<LessonEditorProps> = ({ lesson, path }) => {
       {/* Pedagogical Moments */}
       <div className="flex flex-col gap-4">
         <h3 className="text-sm font-bold uppercase tracking-wider text-orange-600 dark:text-orange-400 border-b border-orange-200 dark:border-orange-950/60 pb-1.5">
-          Momentos Pedagógicos de la Clase
+          {t('pedagogical_moments')}
         </h3>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -208,7 +208,7 @@ export const LessonEditor: React.FC<LessonEditorProps> = ({ lesson, path }) => {
               rows={4}
               value={content.warmUp}
               onChange={e => handleChange('warmUp', e.target.value)}
-              placeholder="Activación, preguntas previas, juego introductorio..."
+              placeholder={t('warmup_ph')}
               className="w-full p-2.5 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-orange-500"
             />
           </div>
@@ -221,7 +221,7 @@ export const LessonEditor: React.FC<LessonEditorProps> = ({ lesson, path }) => {
               rows={4}
               value={content.presentation}
               onChange={e => handleChange('presentation', e.target.value)}
-              placeholder="Explicación del docente, modelaje conceptual..."
+              placeholder={t('presentation_ph')}
               className="w-full p-2.5 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-orange-500"
             />
           </div>
@@ -234,7 +234,7 @@ export const LessonEditor: React.FC<LessonEditorProps> = ({ lesson, path }) => {
               rows={4}
               value={content.guidedPractice}
               onChange={e => handleChange('guidedPractice', e.target.value)}
-              placeholder="Ejercicios en conjunto, retroalimentación en sala..."
+              placeholder={t('guided_ph')}
               className="w-full p-2.5 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-orange-500"
             />
           </div>
@@ -249,7 +249,7 @@ export const LessonEditor: React.FC<LessonEditorProps> = ({ lesson, path }) => {
               rows={4}
               value={content.independentPractice}
               onChange={e => handleChange('independentPractice', e.target.value)}
-              placeholder="Guía individual o en parejas, aplicación práctica..."
+              placeholder={t('independent_ph')}
               className="w-full p-2.5 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-orange-500"
             />
           </div>
@@ -262,7 +262,7 @@ export const LessonEditor: React.FC<LessonEditorProps> = ({ lesson, path }) => {
               rows={4}
               value={content.closure}
               onChange={e => handleChange('closure', e.target.value)}
-              placeholder="Ticket de salida, síntesis, reflexión final..."
+              placeholder={t('closure_ph')}
               className="w-full p-2.5 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-orange-500"
             />
           </div>
@@ -276,7 +276,7 @@ export const LessonEditor: React.FC<LessonEditorProps> = ({ lesson, path }) => {
             rows={2}
             value={content.accommodations}
             onChange={e => handleChange('accommodations', e.target.value)}
-            placeholder="Estrategias de inclusión, apoyos visuales o adaptaciones metodológicas..."
+            placeholder={t('accommodations_ph')}
             className="w-full p-2.5 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-orange-500"
           />
         </div>

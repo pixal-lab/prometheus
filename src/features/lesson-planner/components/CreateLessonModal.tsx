@@ -4,6 +4,7 @@ import { Button } from '../../../components/ui/Button';
 import { useLessonPlannerStore } from '../store/useLessonPlannerStore';
 import { LessonPlanContent } from '../../../core/types/lesson.types';
 import { useToast } from '../../../components/ui/Toast';
+import { useTranslation } from '../../../core/i18n/useTranslation';
 import { BookOpen, Sparkles, CheckSquare, Layers } from 'lucide-react';
 
 interface CreateLessonModalProps {
@@ -19,6 +20,7 @@ export const CreateLessonModal: React.FC<CreateLessonModalProps> = ({
   defaultCourse = '',
   defaultSubject = '',
 }) => {
+  const { t } = useTranslation();
   const { templates, createLessonWithStructure } = useLessonPlannerStore();
   const { showToast } = useToast();
 
@@ -109,12 +111,12 @@ export const CreateLessonModal: React.FC<CreateLessonModalProps> = ({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Crear Nueva Lección Estructurada" maxWidth="lg">
+    <Modal isOpen={isOpen} onClose={onClose} title={t('create_lesson')} maxWidth="lg">
       <form onSubmit={handleSubmit} className="flex flex-col gap-5">
         {/* Course, Subject, Unit, Lesson Number */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <div className="flex flex-col gap-1">
-            <label className="text-xs font-bold uppercase tracking-wider text-slate-500">Curso:</label>
+            <label className="text-xs font-bold uppercase tracking-wider text-slate-500">{t('course_name_field')}:</label>
             <input
               type="text"
               required
@@ -126,7 +128,7 @@ export const CreateLessonModal: React.FC<CreateLessonModalProps> = ({
           </div>
 
           <div className="flex flex-col gap-1">
-            <label className="text-xs font-bold uppercase tracking-wider text-slate-500">Asignatura:</label>
+            <label className="text-xs font-bold uppercase tracking-wider text-slate-500">{t('subject_name_field')}:</label>
             <input
               type="text"
               required
@@ -138,7 +140,7 @@ export const CreateLessonModal: React.FC<CreateLessonModalProps> = ({
           </div>
 
           <div className="flex flex-col gap-1">
-            <label className="text-xs font-bold uppercase tracking-wider text-slate-500">Unidad/Capítulo:</label>
+            <label className="text-xs font-bold uppercase tracking-wider text-slate-500">{t('unit_name_field')}:</label>
             <input
               type="text"
               required
@@ -150,7 +152,7 @@ export const CreateLessonModal: React.FC<CreateLessonModalProps> = ({
           </div>
 
           <div className="flex flex-col gap-1">
-            <label className="text-xs font-bold uppercase tracking-wider text-slate-500">N° Lección:</label>
+            <label className="text-xs font-bold uppercase tracking-wider text-slate-500">{t('lesson_num_field')}:</label>
             <input
               type="number"
               min="1"
@@ -166,7 +168,7 @@ export const CreateLessonModal: React.FC<CreateLessonModalProps> = ({
         {/* Title / Topic Prompt */}
         <div className="flex flex-col gap-1">
           <label className="text-xs font-bold uppercase tracking-wider text-slate-500">
-            Título o Tema Principal de la Lección:
+            {t('lesson_title_field')}:
           </label>
           <input
             type="text"
@@ -181,31 +183,31 @@ export const CreateLessonModal: React.FC<CreateLessonModalProps> = ({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-3 bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-xl">
           <div className="flex flex-col gap-1">
             <label className="text-xs font-bold uppercase tracking-wider text-slate-500">
-              Enfoque Pedagógico:
+              {t('approach_field')}:
             </label>
             <select
               value={approach}
               onChange={e => setApproach(e.target.value as any)}
               className="px-3 py-1.5 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-hidden"
             >
-              <option value="Traditional">Tradicional / Expositivo</option>
-              <option value="Inquiry-Based">Basado en la Indagación</option>
-              <option value="Project-Based">Basado en Proyectos</option>
+              <option value="Traditional">{t('approach_traditional')}</option>
+              <option value="Inquiry-Based">{t('approach_inquiry')}</option>
+              <option value="Project-Based">{t('approach_pbl')}</option>
             </select>
           </div>
 
           <div className="flex flex-col gap-1">
             <label className="text-xs font-bold uppercase tracking-wider text-slate-500">
-              Necesidades de Diferenciación:
+              {t('diff_field')}:
             </label>
             <select
               value={differentiation}
               onChange={e => setDifferentiation(e.target.value as any)}
               className="px-3 py-1.5 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-hidden"
             >
-              <option value="None">Ninguna</option>
-              <option value="Struggling">Estudiantes con Dificultades</option>
-              <option value="Advanced">Estudiantes Avanzados</option>
+              <option value="None">{t('diff_none')}</option>
+              <option value="Struggling">{t('diff_struggling')}</option>
+              <option value="Advanced">{t('diff_advanced')}</option>
             </select>
           </div>
         </div>
@@ -214,7 +216,7 @@ export const CreateLessonModal: React.FC<CreateLessonModalProps> = ({
         <div className="flex flex-col gap-2">
           <label className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
             <CheckSquare size={14} className="text-orange-600" />
-            Momentos Pedagógicos a Incluir:
+            {t('pedagogical_moments')}:
           </label>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
             <label className="flex items-center gap-2 p-2 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/40 cursor-pointer">
@@ -224,7 +226,7 @@ export const CreateLessonModal: React.FC<CreateLessonModalProps> = ({
                 onChange={() => toggleSection('objectives')}
                 className="rounded text-orange-600 focus:ring-orange-500"
               />
-              <span>Objetivos</span>
+              <span>{t('lesson_objectives')}</span>
             </label>
             <label className="flex items-center gap-2 p-2 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/40 cursor-pointer">
               <input
@@ -233,7 +235,7 @@ export const CreateLessonModal: React.FC<CreateLessonModalProps> = ({
                 onChange={() => toggleSection('readings')}
                 className="rounded text-orange-600 focus:ring-orange-500"
               />
-              <span>Páginas / Lecturas</span>
+              <span>{t('lesson_readings')}</span>
             </label>
             <label className="flex items-center gap-2 p-2 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/40 cursor-pointer">
               <input
@@ -242,7 +244,7 @@ export const CreateLessonModal: React.FC<CreateLessonModalProps> = ({
                 onChange={() => toggleSection('warmUp')}
                 className="rounded text-orange-600 focus:ring-orange-500"
               />
-              <span>Calentamiento</span>
+              <span>{t('lesson_warmup')}</span>
             </label>
             <label className="flex items-center gap-2 p-2 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/40 cursor-pointer">
               <input
@@ -251,7 +253,7 @@ export const CreateLessonModal: React.FC<CreateLessonModalProps> = ({
                 onChange={() => toggleSection('presentation')}
                 className="rounded text-orange-600 focus:ring-orange-500"
               />
-              <span>Presentación</span>
+              <span>{t('lesson_presentation')}</span>
             </label>
             <label className="flex items-center gap-2 p-2 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/40 cursor-pointer">
               <input
@@ -260,7 +262,7 @@ export const CreateLessonModal: React.FC<CreateLessonModalProps> = ({
                 onChange={() => toggleSection('guidedPractice')}
                 className="rounded text-orange-600 focus:ring-orange-500"
               />
-              <span>Práctica Guiada</span>
+              <span>{t('lesson_guided')}</span>
             </label>
             <label className="flex items-center gap-2 p-2 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/40 cursor-pointer">
               <input
@@ -269,7 +271,7 @@ export const CreateLessonModal: React.FC<CreateLessonModalProps> = ({
                 onChange={() => toggleSection('independentPractice')}
                 className="rounded text-orange-600 focus:ring-orange-500"
               />
-              <span>Práctica Indep.</span>
+              <span>{t('lesson_independent')}</span>
             </label>
             <label className="flex items-center gap-2 p-2 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/40 cursor-pointer">
               <input
@@ -278,7 +280,7 @@ export const CreateLessonModal: React.FC<CreateLessonModalProps> = ({
                 onChange={() => toggleSection('closure')}
                 className="rounded text-orange-600 focus:ring-orange-500"
               />
-              <span>Cierre</span>
+              <span>{t('lesson_closure')}</span>
             </label>
           </div>
         </div>
@@ -301,7 +303,7 @@ export const CreateLessonModal: React.FC<CreateLessonModalProps> = ({
         {templates.length > 0 && (
           <div className="flex flex-col gap-1">
             <label className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-              <Layers size={14} className="text-orange-600" /> Cargar desde Plantilla:
+              <Layers size={14} className="text-orange-600" /> {t('use_template')}
             </label>
             <select
               value={selectedTemplateId}
@@ -321,10 +323,10 @@ export const CreateLessonModal: React.FC<CreateLessonModalProps> = ({
         {/* Actions */}
         <div className="flex justify-end gap-2 pt-4 border-t border-slate-200 dark:border-slate-800">
           <Button onClick={onClose} variant="ghost" size="sm">
-            Cancelar
+            {t('cancel')}
           </Button>
           <Button type="submit" variant="primary" size="sm">
-            <Sparkles size={16} /> Generar y Guardar Lección
+            <Sparkles size={16} /> {t('create_lesson_btn')}
           </Button>
         </div>
       </form>

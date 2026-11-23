@@ -15,13 +15,15 @@ import {
   FileSpreadsheet,
   FileText,
   ChevronDown,
+  Check,
+  Flame,
 } from 'lucide-react';
 import { useTranslation } from '../../core/i18n/useTranslation';
 import { useTheme } from '../../core/theme/useTheme';
 import { useCalendarStore } from '../../features/calendar/store/useCalendarStore';
 import { CalendarExportService } from '../../features/calendar/services/calendarExportService';
 import { BackupModal } from './BackupModal';
-import { SettingsDrawer } from './SettingsDrawer';
+import { SettingsModal, SettingsTab } from './SettingsModal';
 import { reloadAllStores } from '../../core/storage/rehydrate';
 
 export const Header: React.FC = () => {
@@ -31,13 +33,19 @@ export const Header: React.FC = () => {
 
   const [isBackupOpen, setIsBackupOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [settingsSection, setSettingsSection] = useState<SettingsTab>('general');
   const [isExportMenuOpen, setIsExportMenuOpen] = useState(false);
+  const [isYearMenuOpen, setIsYearMenuOpen] = useState(false);
   const exportMenuRef = useRef<HTMLDivElement>(null);
+  const yearMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (exportMenuRef.current && !exportMenuRef.current.contains(e.target as Node)) {
         setIsExportMenuOpen(false);
+      }
+      if (yearMenuRef.current && !yearMenuRef.current.contains(e.target as Node)) {
+        setIsYearMenuOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -47,22 +55,20 @@ export const Header: React.FC = () => {
   const activeYear = schoolYears.find(y => y.id === activeSchoolYearId) || schoolYears[0];
 
   const navItems = [
-    { to: '/', label: t('nav_calendar'), title: 'Calendario Escolar', icon: Calendar },
-    { to: '/timetable', label: t('nav_timetable'), title: 'Horario Semanal', icon: Clock },
-    { to: '/lesson-planner', label: t('nav_lesson_planner'), title: 'Planificador de Lecciones', icon: BookOpen },
-    { to: '/gradebook', label: t('nav_gradebook'), title: 'Libro de Clases y Notas', icon: GraduationCap },
-    { to: '/proof-correction', label: t('nav_proof_correction'), title: 'Escala de Calificaciones', icon: Calculator },
+    { to: '/', label: t('nav_calendar'), title: t('title_calendar_nav'), icon: Calendar },
+    { to: '/timetable', label: t('nav_timetable'), title: t('title_timetable_nav'), icon: Clock },
+    { to: '/lesson-planner', label: t('nav_lesson_planner'), title: t('title_planner_nav'), icon: BookOpen },
+    { to: '/gradebook', label: t('nav_gradebook'), title: t('title_gradebook_nav'), icon: GraduationCap },
+    { to: '/proof-correction', label: t('nav_proof_correction'), title: t('title_proof_nav'), icon: Calculator },
   ];
 
   return (
     <>
-      <header className="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 shadow-2xs">
+      <header className="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 shadow-2xs print:hidden">
         <div className="max-w-[1700px] mx-auto px-3 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2 sm:gap-4">
           {/* Logo */}
           <NavLink to="/" className="flex items-center gap-2.5 shrink-0 select-none group">
-            <span className="text-2xl filter drop-shadow-sm leading-none transition-transform group-hover:scale-110">
-              🔥
-            </span>
+            <Flame size={24} className="text-orange-600 fill-orange-500 transition-transform group-hover:scale-110 shrink-0" />
             <span className="font-extrabold text-lg tracking-tight bg-gradient-to-r from-orange-600 to-amber-500 bg-clip-text text-transparent">
               Prometheus
             </span>
@@ -93,25 +99,89 @@ export const Header: React.FC = () => {
 
           {/* Right Controls: Harmonious h-9 heights and uniform icon sizes */}
           <div className="flex items-center gap-1.5 shrink-0">
-            {/* Active School Year Dropdown */}
+            {/* Active School Year Dropdown (Custom styled popover menu) */}
             {schoolYears.length > 0 && (
-              <div
-                className="hidden sm:flex items-center h-9 px-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs font-semibold shadow-2xs gap-1.5 text-slate-700 dark:text-slate-200"
-                title="Año Escolar Activo"
-              >
-                <Calendar size={15} className="text-orange-600 shrink-0" />
-                <span className="text-slate-400 text-[10px] uppercase font-bold tracking-wider">Año:</span>
-                <select
-                  value={activeSchoolYearId || ''}
-                  onChange={e => setActiveSchoolYear(Number(e.target.value))}
-                  className="bg-transparent text-slate-800 dark:text-slate-200 focus:outline-hidden cursor-pointer font-bold pr-1 text-xs"
+              <div className="relative" ref={yearMenuRef}>
+                <button
+                  type="button"
+                  onClick={() => setIsYearMenuOpen(prev => !prev)}
+                  className="h-9 px-2.5 sm:px-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-semibold shadow-2xs inline-flex items-center gap-1.5 text-slate-700 dark:text-slate-200 transition-colors cursor-pointer whitespace-nowrap"
+                  title={t('school_year_active')}
+                  aria-expanded={isYearMenuOpen}
                 >
-                  {schoolYears.map(y => (
-                    <option key={y.id} value={y.id} className="dark:bg-slate-900">
-                      {y.name}
-                    </option>
-                  ))}
-                </select>
+                  <Calendar size={15} className="text-orange-600 shrink-0" />
+                  <span className="text-slate-400 text-[10px] uppercase font-bold tracking-wider hidden md:inline">
+                    {t('year_label')}
+                  </span>
+                  <span className="font-bold text-slate-900 dark:text-slate-100 max-w-[120px] truncate">
+                    {activeYear?.name || t('select_school_year')}
+                  </span>
+                  <ChevronDown
+                    size={13}
+                    className={`text-slate-400 shrink-0 transition-transform duration-200 ${isYearMenuOpen ? 'rotate-180' : ''
+                      }`}
+                  />
+                </button>
+
+                {isYearMenuOpen && (
+                  <div className="absolute right-0 mt-2 w-72 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl py-2 z-50 text-xs flex flex-col gap-1 animate-in fade-in zoom-in-95 duration-100 select-none">
+                    <div className="px-3 py-1 flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-1.5">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                        {t('school_years')}
+                      </span>
+                      <span className="text-[10px] font-medium text-slate-400">
+                        {schoolYears.length} {schoolYears.length === 1 ? 'periodo' : 'periodos'}
+                      </span>
+                    </div>
+
+                    <div className="max-h-60 overflow-y-auto px-1.5 py-1 flex flex-col gap-1">
+                      {schoolYears.map(y => {
+                        const isActive = y.id === activeSchoolYearId;
+                        return (
+                          <button
+                            key={y.id}
+                            type="button"
+                            onClick={() => {
+                              setActiveSchoolYear(y.id);
+                              setIsYearMenuOpen(false);
+                            }}
+                            className={`w-full px-3 py-2 rounded-xl text-left flex items-center justify-between gap-2 transition-all cursor-pointer ${isActive
+                                ? 'bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 font-bold border border-orange-200 dark:border-orange-900/60 shadow-2xs'
+                                : 'hover:bg-slate-100 dark:hover:bg-slate-800/80 text-slate-700 dark:text-slate-300 border border-transparent'
+                              }`}
+                          >
+                            <div className="flex flex-col min-w-0">
+                              <span className="truncate text-xs">{y.name}</span>
+                              <span className="text-[10px] font-normal text-slate-400 dark:text-slate-500">
+                                {y.startDate} — {y.endDate}
+                              </span>
+                            </div>
+                            {isActive && (
+                              <span className="flex items-center gap-1 text-[10px] bg-orange-600 text-white font-semibold px-1.5 py-0.5 rounded-md shrink-0">
+                                <Check size={12} /> {t('active')}
+                              </span>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    <div className="pt-1.5 px-1.5 border-t border-slate-100 dark:border-slate-800">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsYearMenuOpen(false);
+                          setSettingsSection('years');
+                          setIsSettingsOpen(true);
+                        }}
+                        className="w-full px-2.5 py-1.5 text-left rounded-xl text-[11px] font-semibold text-slate-600 dark:text-slate-400 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 flex items-center gap-2 transition-colors cursor-pointer"
+                      >
+                        <Cog size={14} className="text-orange-600 shrink-0" />
+                        <span>{t('manage_years')}</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
@@ -120,17 +190,17 @@ export const Header: React.FC = () => {
               <button
                 onClick={() => setIsExportMenuOpen(prev => !prev)}
                 className="h-9 px-2.5 sm:px-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 shadow-2xs inline-flex items-center gap-1.5 transition-colors whitespace-nowrap cursor-pointer"
-                title="Exportar Calendario y Planes"
+                title={t('export_calendar_plans')}
               >
                 <Download size={15} className="text-orange-600 shrink-0" />
-                <span className="hidden xl:inline">Exportar</span>
+                <span className="hidden xl:inline">{t('export')}</span>
                 <ChevronDown size={13} className="text-slate-400 shrink-0" />
               </button>
 
               {isExportMenuOpen && (
                 <div className="absolute right-0 mt-2 w-56 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl py-1.5 z-50 text-xs flex flex-col gap-0.5 animate-in fade-in zoom-in-95 duration-100 select-none">
                   <span className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                    Calendario
+                    {t('calendar')}
                   </span>
                   <button
                     onClick={() => {
@@ -140,7 +210,7 @@ export const Header: React.FC = () => {
                     className="w-full px-3 py-1.5 text-left flex items-center gap-2 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 cursor-pointer"
                   >
                     <FileText size={15} className="text-rose-500 shrink-0" />
-                    <span>Exportar Calendario PDF</span>
+                    <span>{t('export_calendar_pdf')}</span>
                   </button>
                   <button
                     onClick={() => {
@@ -150,7 +220,7 @@ export const Header: React.FC = () => {
                     className="w-full px-3 py-1.5 text-left flex items-center gap-2 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 cursor-pointer"
                   >
                     <FileSpreadsheet size={15} className="text-emerald-600 shrink-0" />
-                    <span>Exportar Calendario Excel</span>
+                    <span>{t('export_calendar_excel')}</span>
                   </button>
                   <button
                     onClick={() => {
@@ -160,12 +230,12 @@ export const Header: React.FC = () => {
                     className="w-full px-3 py-1.5 text-left flex items-center gap-2 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 cursor-pointer"
                   >
                     <FileText size={15} className="text-blue-600 shrink-0" />
-                    <span>Exportar Calendario Word</span>
+                    <span>{t('export_calendar_word')}</span>
                   </button>
 
                   <div className="my-1 border-t border-slate-100 dark:border-slate-800" />
                   <span className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                    Planes de Lección
+                    {t('lesson_plans_menu')}
                   </span>
                   <button
                     onClick={() => {
@@ -175,7 +245,7 @@ export const Header: React.FC = () => {
                     className="w-full px-3 py-1.5 text-left flex items-center gap-2 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 cursor-pointer"
                   >
                     <FileText size={15} className="text-blue-600 shrink-0" />
-                    <span>Exportar Planes Word</span>
+                    <span>{t('export_plans_word')}</span>
                   </button>
                   <button
                     onClick={() => {
@@ -185,7 +255,7 @@ export const Header: React.FC = () => {
                     className="w-full px-3 py-1.5 text-left flex items-center gap-2 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 cursor-pointer"
                   >
                     <FileSpreadsheet size={15} className="text-emerald-600 shrink-0" />
-                    <span>Exportar Planes Excel</span>
+                    <span>{t('export_plans_excel')}</span>
                   </button>
                 </div>
               )}
@@ -197,7 +267,7 @@ export const Header: React.FC = () => {
             <button
               onClick={() => setIsBackupOpen(true)}
               className="w-9 h-9 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-orange-600 dark:hover:text-orange-400 shadow-2xs flex items-center justify-center transition-colors cursor-pointer shrink-0"
-              title="Copias de Seguridad y Archivos Locales"
+              title={t('title_backups')}
             >
               <HardDrive size={16} />
             </button>
@@ -220,9 +290,12 @@ export const Header: React.FC = () => {
             </button>
 
             <button
-              onClick={() => setIsSettingsOpen(true)}
+              onClick={() => {
+                setSettingsSection('general');
+                setIsSettingsOpen(true);
+              }}
               className="w-9 h-9 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-orange-600 dark:hover:text-orange-400 shadow-2xs flex items-center justify-center transition-colors cursor-pointer shrink-0"
-              title="Ajustes Generales y Periodos Escolares"
+              title={t('title_settings')}
             >
               <Cog size={16} />
             </button>
@@ -257,7 +330,14 @@ export const Header: React.FC = () => {
         onClose={() => setIsBackupOpen(false)}
         onDataImported={reloadAllStores}
       />
-      <SettingsDrawer isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => {
+          setIsSettingsOpen(false);
+          setSettingsSection('general');
+        }}
+        initialSection={settingsSection}
+      />
     </>
   );
 };

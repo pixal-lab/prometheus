@@ -90,7 +90,7 @@ export const GradeMatrix: React.FC<GradeMatrixProps> = ({
         <div className="flex items-center gap-2">
           <input
             type="text"
-            placeholder="Nueva Evaluación (ej: Examen 1)"
+            placeholder={t('new_eval_ph')}
             value={newEvalName}
             onChange={e => setNewEvalName(e.target.value)}
             className="px-3 py-1.5 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500 w-56"
@@ -107,12 +107,12 @@ export const GradeMatrix: React.FC<GradeMatrixProps> = ({
             ))}
           </select>
           <Button onClick={handleAddEvaluation} variant="primary" size="sm">
-            <Plus size={14} /> Añadir Columna
+            <Plus size={14} /> {t('add_column_btn')}
           </Button>
         </div>
 
         <span className="text-xs text-slate-400 font-medium">
-          Asignatura activa: <strong className="text-orange-600 dark:text-orange-400">{currentSubject}</strong>
+          {t('active_subject_label')} <strong className="text-orange-600 dark:text-orange-400">{currentSubject}</strong>
         </span>
       </div>
 

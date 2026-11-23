@@ -4,6 +4,7 @@ import { Button } from '../../../components/ui/Button';
 import { useTimetableStore } from '../store/useTimetableStore';
 import { DayOfWeek } from '../../../core/types/timetable.types';
 import { useToast } from '../../../components/ui/Toast';
+import { useTranslation } from '../../../core/i18n/useTranslation';
 import { Clock, Check } from 'lucide-react';
 
 interface DayHoursModalProps {
@@ -31,6 +32,7 @@ function timeStringToMinutes(timeStr: string): number {
 }
 
 export const DayHoursModal: React.FC<DayHoursModalProps> = ({ isOpen, onClose }) => {
+  const { t } = useTranslation();
   const { data, updateDayHours, updateAllDayHours } = useTimetableStore();
   const { showToast } = useToast();
 
@@ -79,7 +81,7 @@ export const DayHoursModal: React.FC<DayHoursModalProps> = ({ isOpen, onClose })
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Configurar Horas de los Días" maxWidth="md">
+    <Modal isOpen={isOpen} onClose={onClose} title={t('day_hours_title')} maxWidth="md">
       <div className="flex flex-col gap-5">
         {/* Tab selection */}
         <div className="flex p-1 bg-slate-100 dark:bg-slate-800 rounded-xl text-xs font-bold">
@@ -91,7 +93,7 @@ export const DayHoursModal: React.FC<DayHoursModalProps> = ({ isOpen, onClose })
                 : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
             }`}
           >
-            General (Toda la semana)
+            {t('general_weekly')}
           </button>
           <button
             onClick={() => setActiveTab('daily')}
@@ -101,7 +103,7 @@ export const DayHoursModal: React.FC<DayHoursModalProps> = ({ isOpen, onClose })
                 : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
             }`}
           >
-            Diario (Personalizado)
+            {t('daily_specific')}
           </button>
         </div>
 
@@ -145,10 +147,10 @@ export const DayHoursModal: React.FC<DayHoursModalProps> = ({ isOpen, onClose })
 
             <div className="flex justify-end gap-2 pt-4 border-t border-slate-200 dark:border-slate-800">
               <Button onClick={onClose} variant="ghost" size="sm">
-                Cancelar
+                {t('cancel')}
               </Button>
               <Button onClick={handleApplyGeneral} variant="primary" size="sm">
-                <Check size={16} /> Aplicar a Toda la Semana
+                <Check size={16} /> {t('apply_to_all_days')}
               </Button>
             </div>
           </div>
@@ -165,7 +167,7 @@ export const DayHoursModal: React.FC<DayHoursModalProps> = ({ isOpen, onClose })
                   className="flex items-center justify-between gap-3 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-900/40"
                 >
                   <span className="text-xs font-bold text-slate-700 dark:text-slate-300 w-20">
-                    {day.label}
+                    {t(day.key)}
                   </span>
                   <div className="flex items-center gap-2">
                     <input
@@ -198,10 +200,10 @@ export const DayHoursModal: React.FC<DayHoursModalProps> = ({ isOpen, onClose })
 
             <div className="flex justify-end gap-2 pt-4 border-t border-slate-200 dark:border-slate-800">
               <Button onClick={onClose} variant="ghost" size="sm">
-                Cancelar
+                {t('cancel')}
               </Button>
               <Button onClick={handleApplyDaily} variant="primary" size="sm">
-                <Check size={16} /> Guardar Horas Diarias
+                <Check size={16} /> {t('save_daily_hours')}
               </Button>
             </div>
           </div>

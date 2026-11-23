@@ -103,10 +103,10 @@ export const LessonPlannerPage: React.FC = () => {
             <BookOpen size={17} className="text-orange-600" /> {t('my_lessons')}
           </h2>
           <div className="flex items-center gap-1">
-            <Button onClick={handleOpenAddCourse} variant="outline" size="sm" title="Añadir Carpeta de Curso">
+            <Button onClick={handleOpenAddCourse} variant="outline" size="sm" title={t('add_folder_title')}>
               <FolderPlus size={15} />
             </Button>
-            <Button onClick={handleOpenCreateLesson} variant="primary" size="sm" title="Crear Nueva Lección">
+            <Button onClick={handleOpenCreateLesson} variant="primary" size="sm" title={t('create_lesson')}>
               <Plus size={15} />
             </Button>
           </div>
@@ -138,7 +138,7 @@ export const LessonPlannerPage: React.FC = () => {
 
           {Object.keys(data).length === 0 && (
             <div className="text-center py-8 text-xs text-slate-400">
-              No hay carpetas creadas. Pulsa el botón de arriba para crear tu primer curso.
+              {t('no_folders_created')}
             </div>
           )}
         </div>
@@ -163,13 +163,13 @@ export const LessonPlannerPage: React.FC = () => {
               <BookOpen size={30} />
             </div>
             <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">
-              Bienvenido al Planificador de Lecciones
+              {t('lesson_planner')}
             </h2>
             <p className="text-sm text-slate-500 dark:text-slate-400 max-w-md mt-1 mb-6">
               Selecciona una lección del árbol de la izquierda para editarla, o crea una nueva lección estructurada con momentos pedagógicos.
             </p>
             <Button onClick={handleOpenCreateLesson} variant="primary">
-              <Sparkles size={16} /> Crear Lección Estructurada
+              <Sparkles size={16} /> {t('create_lesson_btn')}
             </Button>
           </div>
         )}

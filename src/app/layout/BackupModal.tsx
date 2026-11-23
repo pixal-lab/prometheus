@@ -56,12 +56,12 @@ export const BackupModal: React.FC<BackupModalProps> = ({ isOpen, onClose, onDat
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Copia de Seguridad y Archivos Locales">
+    <Modal isOpen={isOpen} onClose={onClose} title={t('backup_title')}>
       <div className="flex flex-col gap-6">
         <div className="flex items-start gap-3 p-3.5 bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-800 rounded-lg text-orange-900 dark:text-orange-200 text-sm">
           <AlertCircle className="shrink-0 text-orange-600 dark:text-orange-400 mt-0.5" size={18} />
           <p>
-            Prometheus almacena todos tus datos localmente en este navegador. Puedes exportar un archivo <code className="font-mono bg-orange-100 dark:bg-orange-900 px-1 py-0.5 rounded">.json</code> para guardar una copia de seguridad en tu equipo o restaurar datos previos de <code className="font-mono bg-orange-100 dark:bg-orange-900 px-1 py-0.5 rounded">Saved Data/</code>.
+            {t('backup_desc')}
           </p>
         </div>
 
@@ -69,24 +69,24 @@ export const BackupModal: React.FC<BackupModalProps> = ({ isOpen, onClose, onDat
           <div className="flex flex-col p-4 border border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50 dark:bg-slate-900/50 justify-between gap-4">
             <div>
               <h4 className="font-semibold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-                <Download size={18} className="text-orange-600" /> Exportar a JSON
+                <Download size={18} className="text-orange-600" /> {t('export_json')}
               </h4>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                Descarga un archivo con todo el calendario, horario, planes de clase y libro de notas.
+                {t('export_json_desc')}
               </p>
             </div>
             <Button onClick={handleExport} variant="primary">
-              <Download size={16} /> Descargar Copia
+              <Download size={16} /> {t('download_backup')}
             </Button>
           </div>
 
           <div className="flex flex-col p-4 border border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50 dark:bg-slate-900/50 justify-between gap-4">
             <div>
               <h4 className="font-semibold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-                <Upload size={18} className="text-blue-600" /> Importar JSON
+                <Upload size={18} className="text-blue-600" /> {t('import_json')}
               </h4>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                Carga un archivo de respaldo previo para restaurar tus cursos y planificaciones.
+                {t('import_json_desc')}
               </p>
             </div>
             <input
@@ -101,7 +101,7 @@ export const BackupModal: React.FC<BackupModalProps> = ({ isOpen, onClose, onDat
               variant="outline"
               disabled={isImporting}
             >
-              <Upload size={16} /> {isImporting ? 'Cargando...' : 'Seleccionar Archivo'}
+              <Upload size={16} /> {isImporting ? t('loading_file') : t('select_file')}
             </Button>
           </div>
         </div>

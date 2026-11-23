@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { Delete, RotateCcw } from 'lucide-react';
+import { useTranslation } from '../../../core/i18n/useTranslation';
 
 export const QuickCalculator: React.FC = () => {
+  const { t } = useTranslation();
   const [display, setDisplay] = useState('0');
   const [firstOperand, setFirstOperand] = useState<number | null>(null);
   const [operator, setOperator] = useState<string | null>(null);
@@ -87,12 +89,12 @@ export const QuickCalculator: React.FC = () => {
   return (
     <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm w-full max-w-xs">
       <div className="flex items-center justify-between mb-3">
-        <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Calculadora</span>
+        <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{t('calculator')}</span>
         <button
           onClick={handleClear}
           className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 flex items-center gap-1"
         >
-          <RotateCcw size={12} /> Limpiar
+          <RotateCcw size={12} /> {t('clear_calc')}
         </button>
       </div>
 

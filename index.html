@@ -3,35 +3,36 @@
 
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" type="image/x-icon" href="/icons/Prometheus-Icon.ico" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="alternate icon" type="image/x-icon" href="/icons/Prometheus-Icon.ico" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Prometheus Educational Suite</title>
+  <title>Prometheus</title>
   <script type="text/javascript">
     // Restaura la URL limpia si proviene de una redireccion 404 en GitHub Pages
-    (function(l) {
-      if (l.search[1] === '/' ) {
-        var decoded = l.search.slice(1).split('&').map(function(s) { 
+    (function (l) {
+      if (l.search[1] === '/') {
+        var decoded = l.search.slice(1).split('&').map(function (s) {
           return s.replace(/~and~/g, '&')
         }).join('?');
         window.history.replaceState(null, null,
-            l.pathname.slice(0, -1) + decoded + l.hash
+          l.pathname.slice(0, -1) + decoded + l.hash
         );
       }
     }(window.location))
   </script>
   <script>
-    (function () {
-      try {
-        var mode = localStorage.getItem('darkMode');
-        if (mode === 'enabled') {
-          document.documentElement.classList.add('dark');
-          document.documentElement.style.colorScheme = 'dark';
-        } else {
-          document.documentElement.classList.remove('dark');
-          document.documentElement.style.colorScheme = 'light';
-        }
-      } catch (e) { }
-    })();
+      (function () {
+        try {
+          var mode = localStorage.getItem('darkMode');
+          if (mode === 'enabled') {
+            document.documentElement.classList.add('dark');
+            document.documentElement.style.colorScheme = 'dark';
+          } else {
+            document.documentElement.classList.remove('dark');
+            document.documentElement.style.colorScheme = 'light';
+          }
+        } catch (e) { }
+      })();
   </script>
 </head>
 

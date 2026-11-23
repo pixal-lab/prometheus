@@ -84,17 +84,18 @@ export const GradebookPage: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-800">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100 flex items-center gap-2">
-            📖 {t('gradebook')}
+            <GraduationCap size={26} className="text-orange-600 dark:text-orange-400" />
+            <span>{t('gradebook')}</span>
           </h1>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-            Gestión integral de ficha de alumno, calificaciones ponderadas, registro de asistencia y observaciones.
+            {t('gradebook_subtitle')}
           </p>
         </div>
 
         {/* Global course actions */}
         <div className="flex flex-wrap items-center gap-2">
           <Button onClick={() => setIsAddCourseOpen(true)} variant="outline" size="sm">
-            <Plus size={15} /> Crear Curso
+            <Plus size={15} /> {t('create_course_btn')}
           </Button>
 
           {activeCourse && (
@@ -114,14 +115,14 @@ export const GradebookPage: React.FC = () => {
                   className="px-2.5 py-1 text-xs font-semibold rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 flex items-center gap-1.5 transition-colors whitespace-nowrap cursor-pointer"
                   title="Exportar Calificaciones del Curso a CSV"
                 >
-                  <FileSpreadsheet size={15} className="text-emerald-600 shrink-0" /> Notas CSV
+                  <FileSpreadsheet size={15} className="text-emerald-600 shrink-0" /> {t('grades_csv')}
                 </button>
                 <button
                   onClick={handleExportAttendance}
                   className="px-2.5 py-1 text-xs font-semibold rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 flex items-center gap-1.5 transition-colors whitespace-nowrap cursor-pointer"
                   title="Exportar Asistencia del Curso a CSV"
                 >
-                  <FileSpreadsheet size={15} className="text-blue-600 shrink-0" /> Asistencia CSV
+                  <FileSpreadsheet size={15} className="text-blue-600 shrink-0" /> {t('attendance_csv')}
                 </button>
               </div>
 
@@ -138,7 +139,7 @@ export const GradebookPage: React.FC = () => {
         {/* Course and Subject dropdowns */}
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Curso:</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">{t('course_dropdown_label')}</span>
             <select
               value={activeCourse?.id || ''}
               onChange={e => selectCourse(Number(e.target.value))}
@@ -146,7 +147,7 @@ export const GradebookPage: React.FC = () => {
             >
               {data.courses.map(c => (
                 <option key={c.id} value={c.id}>
-                  {c.name} ({data.students.filter(s => s.courseId === c.id).length} alumnos)
+                  {c.name} ({data.students.filter(s => s.courseId === c.id).length} {t('students_count_label')})
                 </option>
               ))}
             </select>
@@ -154,7 +155,7 @@ export const GradebookPage: React.FC = () => {
 
           {activeCourse && data.activeTab === 'grades' && (
             <div className="flex items-center gap-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Asignatura:</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-500">{t('subject_dropdown_label')}</span>
               <select
                 value={activeSubject}
                 onChange={e => setActiveSubject(e.target.value)}
@@ -180,7 +181,7 @@ export const GradebookPage: React.FC = () => {
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
             }`}
           >
-            <User size={15} /> Ficha Alumno
+            <User size={15} /> {t('student_file_tab')}
           </button>
           <button
             onClick={() => setActiveTab('grades')}

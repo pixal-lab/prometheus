@@ -4,6 +4,7 @@ import { LessonFolder, LessonItem, LessonTreeNode } from '../../../core/types/le
 import { useLessonPlannerStore } from '../store/useLessonPlannerStore';
 import { useDialog } from '../../../components/ui/Dialog';
 import { useToast } from '../../../components/ui/Toast';
+import { useTranslation } from '../../../core/i18n/useTranslation';
 
 interface TreeNodeProps {
   name: string;
@@ -13,6 +14,7 @@ interface TreeNodeProps {
 }
 
 export const TreeNode: React.FC<TreeNodeProps> = ({ name, node, path, filter }) => {
+  const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(true);
   const { activeLessonPath, setActiveLesson, createFolder, createLesson, deleteNode, renameNode } = useLessonPlannerStore();
   const { prompt, confirm } = useDialog();
@@ -117,10 +119,10 @@ export const TreeNode: React.FC<TreeNodeProps> = ({ name, node, path, filter }) 
           <span className="truncate">{lesson.title}</span>
         </div>
         <div className="opacity-0 group-hover:opacity-100 flex items-center gap-1 transition-opacity">
-          <button onClick={handleRename} className="p-1 hover:text-slate-900 dark:hover:text-slate-100" title="Renombrar">
+          <button onClick={handleRename} className="p-1 hover:text-slate-900 dark:hover:text-slate-100" title={t('rename_prompt')}>
             <Edit2 size={13} />
           </button>
-          <button onClick={handleDelete} className="p-1 hover:text-rose-600 transition-colors" title="Eliminar">
+          <button onClick={handleDelete} className="p-1 hover:text-rose-600 transition-colors" title={t('delete')}>
             <Trash2 size={13} />
           </button>
         </div>
@@ -142,16 +144,16 @@ export const TreeNode: React.FC<TreeNodeProps> = ({ name, node, path, filter }) 
         </div>
 
         <div className="opacity-0 group-hover:opacity-100 flex items-center gap-1 transition-opacity" onClick={e => e.stopPropagation()}>
-          <button onClick={handleAddLesson} className="p-1 text-slate-500 hover:text-orange-600" title="Añadir Lección">
+          <button onClick={handleAddLesson} className="p-1 text-slate-500 hover:text-orange-600" title={t('new_lesson_prompt')}>
             <Plus size={14} />
           </button>
-          <button onClick={handleAddFolder} className="p-1 text-slate-500 hover:text-amber-600" title="Añadir Subcarpeta">
+          <button onClick={handleAddFolder} className="p-1 text-slate-500 hover:text-amber-600" title={t('new_folder_prompt')}>
             <FolderPlus size={14} />
           </button>
-          <button onClick={handleRename} className="p-1 text-slate-500 hover:text-slate-900" title="Renombrar">
+          <button onClick={handleRename} className="p-1 text-slate-500 hover:text-slate-900" title={t('rename_prompt')}>
             <Edit2 size={13} />
           </button>
-          <button onClick={handleDelete} className="p-1 text-slate-500 hover:text-rose-600" title="Eliminar">
+          <button onClick={handleDelete} className="p-1 text-slate-500 hover:text-rose-600" title={t('delete')}>
             <Trash2 size={13} />
           </button>
         </div>

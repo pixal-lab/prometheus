@@ -42,8 +42,6 @@ import {
 } from 'lucide-react';
 import { useTranslation } from '../../core/i18n/useTranslation';
 
-dayjs.locale('es');
-
 export const CalendarPage: React.FC = () => {
   const { t } = useTranslation();
   const { showToast } = useToast();
@@ -148,39 +146,41 @@ export const CalendarPage: React.FC = () => {
     return expandRecurringEvents(classBlocks, rangeStart, rangeEnd);
   }, [classBlocks, currentDate]);
 
-  const VIEW_TABS: { id: CalendarViewType; label: string }[] = [
-    { id: 'day', label: 'Día' },
-    { id: 'week', label: 'Semana' },
-    { id: 'month', label: 'Mes' },
-    { id: 'quarter', label: 'Trimestral' },
-    { id: 'semester', label: 'Semestral' },
-    { id: 'year', label: 'Anual' },
-    { id: 'agenda', label: 'Agenda' },
+  const VIEW_TABS: { id: CalendarViewType; labelKey: string }[] = [
+    { id: 'day', labelKey: 'view_day' },
+    { id: 'week', labelKey: 'view_week' },
+    { id: 'month', labelKey: 'view_month' },
+    { id: 'quarter', labelKey: 'view_quarter' },
+    { id: 'semester', labelKey: 'view_semester' },
+    { id: 'year', labelKey: 'view_year' },
+    { id: 'agenda', labelKey: 'view_agenda' },
   ];
 
   const viewTitle = useMemo(() => {
     const cur = dayjs(currentDate);
     if (currentView === 'day') {
-      return cur.format('dddd, DD [de] MMMM [de] YYYY');
+      return cur.locale() === 'es'
+        ? cur.format('dddd, DD [de] MMMM [de] YYYY')
+        : cur.format('dddd, MMMM DD, YYYY');
     }
     if (currentView === 'week') {
       const mon = cur.startOf('isoWeek');
       const fri = mon.add(4, 'day');
-      return `Semana ${mon.format('DD')} - ${fri.format('DD MMMM YYYY')}`;
+      return `${t('week_prefix')} ${mon.format('DD')} - ${fri.format('DD MMMM YYYY')}`;
     }
     if (currentView === 'quarter') {
       const q = Math.floor(cur.month() / 3) + 1;
-      return `Trimestre ${q} - ${cur.year()}`;
+      return `${t('quarter_prefix')} ${q} - ${cur.year()}`;
     }
     if (currentView === 'semester') {
       const sem = cur.month() < 6 ? 1 : 2;
-      return `Semestre ${sem} - ${cur.year()}`;
+      return `${t('semester_prefix')} ${sem} - ${cur.year()}`;
     }
     if (currentView === 'year') {
-      return `Año ${cur.year()}`;
+      return `${t('year_prefix')} ${cur.year()}`;
     }
     return cur.format('MMMM YYYY');
-  }, [currentDate, currentView]);
+  }, [currentDate, currentView, t]);
 
   const handleEventClick = (event: ClassBlock) => {
     setActiveEvent(event);
@@ -287,7 +287,7 @@ export const CalendarPage: React.FC = () => {
             <button
               onClick={() => navigateDate('prev')}
               className="p-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-              title="Mes Anterior"
+              title={t('month_prev')}
             >
               <ChevronLeft size={18} />
             </button>
@@ -295,12 +295,12 @@ export const CalendarPage: React.FC = () => {
               onClick={() => navigateDate('today')}
               className="px-3 py-1 text-xs font-bold text-slate-700 dark:text-slate-300 hover:text-orange-600 transition-colors"
             >
-              Hoy
+              {t('today')}
             </button>
             <button
               onClick={() => navigateDate('next')}
               className="p-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-              title="Mes Siguiente"
+              title={t('month_next')}
             >
               <ChevronRight size={18} />
             </button>
@@ -319,7 +319,7 @@ export const CalendarPage: React.FC = () => {
               onClick={undo}
               disabled={undoStack.length === 0}
               className="p-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-              title="Deshacer (Ctrl + Z)"
+              title="Ctrl + Z"
             >
               <Undo2 size={16} />
             </button>
@@ -327,7 +327,7 @@ export const CalendarPage: React.FC = () => {
               onClick={redo}
               disabled={redoStack.length === 0}
               className="p-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-              title="Rehacer (Ctrl + Y)"
+              title="Ctrl + Y"
             >
               <Redo2 size={16} />
             </button>
@@ -344,18 +344,18 @@ export const CalendarPage: React.FC = () => {
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
                   }`}
               >
-                {tab.label}
+                {t(tab.labelKey)}
               </button>
             ))}
           </div>
 
           {/* Action Modals */}
-          <Button onClick={() => setIsSubjectsModalOpen(true)} variant="outline" size="sm" title="Ajustes de Asignaturas y Colores">
-            <Palette size={15} /> Asignaturas
+          <Button onClick={() => setIsSubjectsModalOpen(true)} variant="outline" size="sm" title={t('subject_mgmt_title')}>
+            <Palette size={15} /> {t('subjects_btn')}
           </Button>
 
-          <Button onClick={() => setIsCopyMoveModalOpen(true)} variant="outline" size="sm" title="Copiar/Mover Años Escolares">
-            <Copy size={15} /> Años Escolares
+          <Button onClick={() => setIsCopyMoveModalOpen(true)} variant="outline" size="sm" title={t('copy_move_year')}>
+            <Copy size={15} /> {t('school_years_btn')}
           </Button>
 
           {/* Export Dropdown */}
@@ -363,10 +363,10 @@ export const CalendarPage: React.FC = () => {
             <button
               onClick={() => setIsExportMenuOpen(prev => !prev)}
               className="h-8 px-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 shadow-2xs flex items-center gap-1.5 text-xs font-semibold transition-colors cursor-pointer"
-              title="Exportar Calendario o Planes"
+              title={t('export_calendar_plans')}
             >
               <Download size={14} className="text-orange-600 shrink-0" />
-              <span>Exportar</span>
+              <span>{t('export_btn')}</span>
               <ChevronDown size={13} className={`text-slate-400 transition-transform ${isExportMenuOpen ? 'rotate-180' : ''}`} />
             </button>
 
@@ -380,7 +380,7 @@ export const CalendarPage: React.FC = () => {
                   className="w-full px-3 py-2 text-left flex items-center gap-2 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 cursor-pointer"
                 >
                   <Printer size={14} className="text-orange-600 shrink-0" />
-                  <span>Imprimir / PDF</span>
+                  <span>{t('print_pdf')}</span>
                 </button>
                 <button
                   onClick={() => {
@@ -391,7 +391,7 @@ export const CalendarPage: React.FC = () => {
                   className="w-full px-3 py-2 text-left flex items-center gap-2 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 cursor-pointer"
                 >
                   <FileText size={14} className="text-blue-600 shrink-0" />
-                  <span>Calendario a Word (.doc)</span>
+                  <span>{t('cal_word')}</span>
                 </button>
                 <button
                   onClick={() => {
@@ -401,7 +401,7 @@ export const CalendarPage: React.FC = () => {
                   className="w-full px-3 py-2 text-left flex items-center gap-2 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 cursor-pointer"
                 >
                   <FileSpreadsheet size={14} className="text-emerald-600 shrink-0" />
-                  <span>Calendario a Excel (.csv)</span>
+                  <span>{t('cal_excel')}</span>
                 </button>
                 <div className="my-1 border-t border-slate-100 dark:border-slate-800" />
                 <button
@@ -412,7 +412,7 @@ export const CalendarPage: React.FC = () => {
                   className="w-full px-3 py-2 text-left flex items-center gap-2 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 cursor-pointer"
                 >
                   <FileText size={14} className="text-indigo-600 shrink-0" />
-                  <span>Planes a Word (.doc)</span>
+                  <span>{t('plans_word')}</span>
                 </button>
                 <button
                   onClick={() => {
@@ -422,7 +422,7 @@ export const CalendarPage: React.FC = () => {
                   className="w-full px-3 py-2 text-left flex items-center gap-2 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 cursor-pointer"
                 >
                   <FileSpreadsheet size={14} className="text-teal-600 shrink-0" />
-                  <span>Planes a Excel (.csv)</span>
+                  <span>{t('plans_excel')}</span>
                 </button>
               </div>
             )}

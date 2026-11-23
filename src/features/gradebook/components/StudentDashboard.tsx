@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Course, Student, GradeItem, AttendanceRecord, StudentObservation, StudentReminder } from '../../../core/types/gradebook.types';
 import { useGradebookStore } from '../store/useGradebookStore';
 import { useToast } from '../../../components/ui/Toast';
+import { useTranslation } from '../../../core/i18n/useTranslation';
 import { Button } from '../../../components/ui/Button';
 import {
   User,
@@ -35,6 +36,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
   observations,
   reminders,
 }) => {
+  const { t } = useTranslation();
   const { setStudentObservation, addStudentReminder, deleteStudentReminder } = useGradebookStore();
   const { showToast } = useToast();
 
@@ -154,14 +156,14 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
       {/* Student List Sidebar */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-xs flex flex-col gap-3">
         <div className="flex items-center justify-between">
-          <h3 className="font-bold text-xs uppercase tracking-wider text-slate-500">Alumnos ({students.length})</h3>
+          <h3 className="font-bold text-xs uppercase tracking-wider text-slate-500">{t('students_sidebar')} ({students.length})</h3>
         </div>
 
         <div className="relative">
           <Search size={14} className="absolute left-2.5 top-2.5 text-slate-400" />
           <input
             type="text"
-            placeholder="Buscar alumno..."
+            placeholder={t('search_student_ph')}
             value={studentSearch}
             onChange={e => setStudentSearch(e.target.value)}
             className="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-hidden"
@@ -216,7 +218,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
           {/* Quick Metrics */}
           <div className="flex items-center gap-4">
             <div className="flex flex-col items-center px-4 py-2 bg-slate-50 dark:bg-slate-800/80 rounded-xl border border-slate-200 dark:border-slate-700/60">
-              <span className="text-[10px] font-bold uppercase text-slate-400">Promedio General</span>
+              <span className="text-[10px] font-bold uppercase text-slate-400">{t('general_average')}</span>
               <span
                 className={`text-lg font-bold font-mono ${
                   overallAverage >= 6.0
@@ -233,7 +235,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
             </div>
 
             <div className="flex flex-col items-center px-4 py-2 bg-slate-50 dark:bg-slate-800/80 rounded-xl border border-slate-200 dark:border-slate-700/60">
-              <span className="text-[10px] font-bold uppercase text-slate-400">Asistencia</span>
+              <span className="text-[10px] font-bold uppercase text-slate-400">{t('attendance')}</span>
               <span
                 className={`text-lg font-bold font-mono ${
                   studentAttendance.rate >= 85
@@ -253,7 +255,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-xs flex flex-col gap-4">
           <h3 className="font-bold text-xs uppercase tracking-wider text-slate-500 flex items-center gap-2">
             <GraduationCap size={16} className="text-orange-600" />
-            Rendimiento por Asignatura
+            {t('subject_performance')}
           </h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -279,7 +281,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
                           : 'bg-slate-100 dark:bg-slate-800 text-slate-400'
                       }`}
                     >
-                      {avg > 0 ? avg.toFixed(1) : 'Sin notas'}
+                      {avg > 0 ? avg.toFixed(1) : t('no_grades_short')}
                     </span>
                   </div>
 
@@ -297,7 +299,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
                       ))}
                     </div>
                   ) : (
-                    <span className="text-[11px] text-slate-400 italic">No hay calificaciones registradas</span>
+                    <span className="text-[11px] text-slate-400 italic">{t('no_grades_recorded')}</span>
                   )}
                 </div>
               );
@@ -311,34 +313,34 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-xs flex flex-col gap-3">
             <h3 className="font-bold text-xs uppercase tracking-wider text-slate-500 flex items-center gap-2">
               <CalendarCheck size={16} className="text-orange-600" />
-              Detalle de Asistencia
+              {t('attendance_breakdown')}
             </h3>
 
             <div className="grid grid-cols-2 gap-2 text-xs">
               <div className="p-2.5 rounded-xl border border-emerald-200 dark:border-emerald-900/50 bg-emerald-50/50 dark:bg-emerald-950/20 flex items-center justify-between">
                 <span className="flex items-center gap-1.5 text-emerald-700 dark:text-emerald-300 font-semibold">
-                  <CheckCircle2 size={14} /> Presentes:
+                  <CheckCircle2 size={14} /> {t('present_plural')}:
                 </span>
                 <span className="font-bold font-mono text-emerald-800 dark:text-emerald-200">{studentAttendance.present}</span>
               </div>
 
               <div className="p-2.5 rounded-xl border border-rose-200 dark:border-rose-900/50 bg-rose-50/50 dark:bg-rose-950/20 flex items-center justify-between">
                 <span className="flex items-center gap-1.5 text-rose-700 dark:text-rose-300 font-semibold">
-                  <XCircle size={14} /> Ausentes:
+                  <XCircle size={14} /> {t('absent_plural')}:
                 </span>
                 <span className="font-bold font-mono text-rose-800 dark:text-rose-200">{studentAttendance.absent}</span>
               </div>
 
               <div className="p-2.5 rounded-xl border border-amber-200 dark:border-amber-900/50 bg-amber-50/50 dark:bg-amber-950/20 flex items-center justify-between">
                 <span className="flex items-center gap-1.5 text-amber-700 dark:text-amber-300 font-semibold">
-                  <Clock size={14} /> Atrasos:
+                  <Clock size={14} /> {t('late_plural')}:
                 </span>
                 <span className="font-bold font-mono text-amber-800 dark:text-amber-200">{studentAttendance.late}</span>
               </div>
 
               <div className="p-2.5 rounded-xl border border-blue-200 dark:border-blue-900/50 bg-blue-50/50 dark:bg-blue-950/20 flex items-center justify-between">
                 <span className="flex items-center gap-1.5 text-blue-700 dark:text-blue-300 font-semibold">
-                  <HelpCircle size={14} /> Justificados:
+                  <HelpCircle size={14} /> {t('excused_plural')}:
                 </span>
                 <span className="font-bold font-mono text-blue-800 dark:text-blue-200">{studentAttendance.excused}</span>
               </div>
@@ -349,13 +351,13 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-xs flex flex-col gap-3">
             <h3 className="font-bold text-xs uppercase tracking-wider text-slate-500 flex items-center gap-2">
               <AlertCircle size={16} className="text-orange-600" />
-              Recordatorios / Alertas
+              {t('reminders_alerts')}
             </h3>
 
             <form onSubmit={handleAddReminder} className="flex gap-2">
               <input
                 type="text"
-                placeholder="Añadir recordatorio o tarea..."
+                placeholder={t('add_reminder_ph')}
                 value={newReminderText}
                 onChange={e => setNewReminderText(e.target.value)}
                 className="flex-1 px-3 py-1.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-hidden"
@@ -367,7 +369,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
 
             <div className="flex flex-col gap-1.5 max-h-[160px] overflow-y-auto pr-1">
               {studentReminders.length === 0 ? (
-                <span className="text-xs text-slate-400 italic py-2">No hay recordatorios pendientes.</span>
+                <span className="text-xs text-slate-400 italic py-2">{t('no_reminders')}</span>
               ) : (
                 studentReminders.map(r => (
                   <div
@@ -393,10 +395,10 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-xs flex flex-col gap-3">
           <div className="flex items-center justify-between">
             <h3 className="font-bold text-xs uppercase tracking-wider text-slate-500">
-              Observaciones del Alumno / Historial Pedagógico
+              {t('student_obs_title')}
             </h3>
             <Button onClick={handleSaveObservation} variant="primary" size="sm">
-              <Save size={14} /> Guardar Observación
+              <Save size={14} /> {t('save_obs_btn')}
             </Button>
           </div>
 
@@ -404,7 +406,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
             rows={4}
             value={obsText}
             onChange={e => setObsText(e.target.value)}
-            placeholder="Escribe notas, observaciones conductuales o seguimiento del estudiante..."
+            placeholder={t('obs_ph')}
             className="w-full p-3 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-hidden focus:ring-2 focus:ring-orange-500"
           />
         </div>

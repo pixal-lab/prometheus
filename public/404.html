@@ -1,22 +1,27 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="utf-8">
-    <title>Prometheus Educational Suite</title>
-    <script type="text/javascript">
-      // Redireccion SPA para GitHub Pages (spa-github-pages)
-      // Mantiene rutas como /timetable al recargar con F5
-      var pathSegmentsToKeep = 0; // 0 para subdominio raiz prometheus.pahumada.cl
-      var l = window.location;
-      l.replace(
-        l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
-        l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') + '/?/' +
-        l.pathname.slice(1).split('/').slice(pathSegmentsToKeep).join('/').replace(/&/g, '~and~') +
-        (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
-        l.hash
-      );
-    </script>
-  </head>
-  <body>
-  </body>
+
+<head>
+  <meta charset="utf-8">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="alternate icon" type="image/x-icon" href="/icons/Prometheus-Icon.ico">
+  <title>Prometheus</title>
+  <script type="text/javascript">
+    // Redireccion SPA para GitHub Pages (spa-github-pages)
+    // Mantiene rutas como /timetable al recargar con F5
+    var pathSegmentsToKeep = 0; // 0 para subdominio raiz prometheus.pahumada.cl
+    var l = window.location;
+    l.replace(
+      l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
+      l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') + '/?/' +
+      l.pathname.slice(1).split('/').slice(pathSegmentsToKeep).join('/').replace(/&/g, '~and~') +
+      (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
+      l.hash
+    );
+  </script>
+</head>
+
+<body>
+</body>
+
 </html>

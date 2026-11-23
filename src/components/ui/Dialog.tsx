@@ -14,6 +14,7 @@ import {
   Check,
 } from 'lucide-react';
 import { Button } from './Button';
+import { useTranslation } from '../../core/i18n/useTranslation';
 
 export interface ConfirmOptions {
   title: string;
@@ -84,8 +85,8 @@ export const useDialogStore = create<DialogState>((set, get) => ({
         type: 'confirm',
         title: options.title,
         message: options.message,
-        confirmText: options.confirmText || 'Confirmar',
-        cancelText: options.cancelText || 'Cancelar',
+        confirmText: options.confirmText || useTranslation.getState().t('confirm', 'Confirmar'),
+        cancelText: options.cancelText || useTranslation.getState().t('cancel', 'Cancelar'),
         variant: options.variant || (options.icon === 'trash' ? 'danger' : 'primary'),
         icon: options.icon || (options.variant === 'danger' ? 'trash' : 'warning'),
         resolve: (val: boolean) => {
@@ -105,8 +106,8 @@ export const useDialogStore = create<DialogState>((set, get) => ({
         message: options.message,
         placeholder: options.placeholder || '',
         defaultValue: options.defaultValue || '',
-        confirmText: options.confirmText || 'Guardar',
-        cancelText: options.cancelText || 'Cancelar',
+        confirmText: options.confirmText || useTranslation.getState().t('save', 'Guardar'),
+        cancelText: options.cancelText || useTranslation.getState().t('cancel', 'Cancelar'),
         variant: options.variant || 'primary',
         icon: options.icon || 'edit',
         inputType: options.inputType || 'text',
@@ -125,7 +126,7 @@ export const useDialogStore = create<DialogState>((set, get) => ({
         type: 'alert',
         title: options.title,
         message: options.message,
-        confirmText: options.confirmText || 'Entendido',
+        confirmText: options.confirmText || useTranslation.getState().t('understood', 'Entendido'),
         variant: options.variant || 'info',
         icon: 'info',
         resolve: () => {

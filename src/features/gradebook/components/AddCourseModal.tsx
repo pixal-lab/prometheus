@@ -3,6 +3,7 @@ import { Modal } from '../../../components/ui/Modal';
 import { Button } from '../../../components/ui/Button';
 import { useGradebookStore } from '../store/useGradebookStore';
 import { useToast } from '../../../components/ui/Toast';
+import { useTranslation } from '../../../core/i18n/useTranslation';
 import { Plus } from 'lucide-react';
 
 interface AddCourseModalProps {
@@ -11,6 +12,7 @@ interface AddCourseModalProps {
 }
 
 export const AddCourseModal: React.FC<AddCourseModalProps> = ({ isOpen, onClose }) => {
+  const { t } = useTranslation();
   const { addCourse } = useGradebookStore();
   const { showToast } = useToast();
 
@@ -28,11 +30,11 @@ export const AddCourseModal: React.FC<AddCourseModalProps> = ({ isOpen, onClose 
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Crear Nuevo Curso" maxWidth="md">
+    <Modal isOpen={isOpen} onClose={onClose} title={t('add_course_title')} maxWidth="md">
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div className="flex flex-col gap-1.5">
           <label className="text-xs font-bold uppercase tracking-wider text-slate-500">
-            Nombre del Curso:
+            {t('course_name_label')}
           </label>
           <input
             type="text"
@@ -47,7 +49,7 @@ export const AddCourseModal: React.FC<AddCourseModalProps> = ({ isOpen, onClose 
 
         <div className="flex flex-col gap-1.5">
           <label className="text-xs font-bold uppercase tracking-wider text-slate-500">
-            Asignaturas (separadas por comas):
+            {t('course_subjects_comma')}
           </label>
           <textarea
             rows={3}
@@ -58,16 +60,16 @@ export const AddCourseModal: React.FC<AddCourseModalProps> = ({ isOpen, onClose 
             className="px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-hidden focus:ring-2 focus:ring-orange-500"
           />
           <span className="text-[11px] text-slate-400">
-            Define las asignaturas en las que se registrarán las notas de los estudiantes de este curso.
+            {t('course_subjects_desc')}
           </span>
         </div>
 
         <div className="flex justify-end gap-2 pt-2 border-t border-slate-200 dark:border-slate-800">
           <Button onClick={onClose} variant="ghost" size="sm">
-            Cancelar
+            {t('cancel')}
           </Button>
           <Button type="submit" variant="primary" size="sm">
-            <Plus size={16} /> Crear Curso
+            <Plus size={16} /> {t('create_course_btn')}
           </Button>
         </div>
       </form>

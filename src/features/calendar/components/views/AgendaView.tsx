@@ -2,6 +2,7 @@ import React from 'react';
 import dayjs from 'dayjs';
 import { ClassBlock, SubjectConfig } from '../../../../core/types/calendar.types';
 import { Award, Calendar } from 'lucide-react';
+import { useTranslation } from '../../../../core/i18n/useTranslation';
 
 interface AgendaViewProps {
   currentDate: string;
@@ -16,6 +17,7 @@ export const AgendaView: React.FC<AgendaViewProps> = ({
   subjects,
   onEventClick,
 }) => {
+  const { t } = useTranslation();
   const current = dayjs(currentDate);
   const start = current.startOf('month');
   const end = current.endOf('month');
@@ -89,7 +91,7 @@ export const AgendaView: React.FC<AgendaViewProps> = ({
 
                   {block.evaluation && (
                     <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 text-xs font-semibold">
-                      <Award size={13} /> Evaluación
+                      <Award size={13} /> {t('include_evaluation')}
                     </div>
                   )}
                 </div>
@@ -101,7 +103,7 @@ export const AgendaView: React.FC<AgendaViewProps> = ({
 
       {Object.keys(grouped).length === 0 && (
         <div className="p-12 text-center text-slate-400 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl">
-          No hay clases registradas en este mes.
+          {t('no_classes_month')}
         </div>
       )}
     </div>

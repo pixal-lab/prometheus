@@ -47,12 +47,12 @@ export const CopyMoveYearModal: React.FC<CopyMoveYearModalProps> = ({ isOpen, on
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Copiar o Mover Eventos de un Año a Otro">
+    <Modal isOpen={isOpen} onClose={onClose} title={t('copy_move_title')}>
       <div className="flex flex-col gap-5">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="flex flex-col gap-1.5">
             <label className="text-xs font-bold uppercase tracking-wider text-slate-500">
-              Año de Origen:
+              {t('source_year')}
             </label>
             <select
               value={sourceYearId}
@@ -69,7 +69,7 @@ export const CopyMoveYearModal: React.FC<CopyMoveYearModalProps> = ({ isOpen, on
 
           <div className="flex flex-col gap-1.5">
             <label className="text-xs font-bold uppercase tracking-wider text-slate-500">
-              Año de Destino:
+              {t('target_year')}
             </label>
             <select
               value={targetYearId}
@@ -89,14 +89,14 @@ export const CopyMoveYearModal: React.FC<CopyMoveYearModalProps> = ({ isOpen, on
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
             <label className="text-xs font-bold uppercase tracking-wider text-slate-500">
-              Asignaturas a Transferir:
+              {t('subjects_to_transfer')}
             </label>
             <button
               type="button"
               onClick={() => handleSelectAll(selectedSubjects.length !== Object.keys(subjects).length)}
               className="text-xs text-orange-600 dark:text-orange-400 font-semibold hover:underline"
             >
-              {selectedSubjects.length === Object.keys(subjects).length ? 'Deseleccionar Todo' : 'Seleccionar Todo'}
+              {selectedSubjects.length === Object.keys(subjects).length ? t('deselect_all') : t('select_all')}
             </button>
           </div>
 
@@ -117,7 +117,7 @@ export const CopyMoveYearModal: React.FC<CopyMoveYearModalProps> = ({ isOpen, on
 
         {/* Action Choice */}
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-bold uppercase tracking-wider text-slate-500">Acción:</label>
+          <label className="text-xs font-bold uppercase tracking-wider text-slate-500">{t('action_label')}</label>
           <div className="flex items-center gap-4">
             <label className="flex items-center gap-2 text-sm font-semibold cursor-pointer">
               <input
@@ -128,7 +128,7 @@ export const CopyMoveYearModal: React.FC<CopyMoveYearModalProps> = ({ isOpen, on
                 onChange={() => setAction('copy')}
                 className="text-orange-600 focus:ring-orange-500"
               />
-              <span>Copiar (Dejar originales)</span>
+              <span>{t('copy_keep_original')}</span>
             </label>
             <label className="flex items-center gap-2 text-sm font-semibold cursor-pointer">
               <input
@@ -139,7 +139,7 @@ export const CopyMoveYearModal: React.FC<CopyMoveYearModalProps> = ({ isOpen, on
                 onChange={() => setAction('move')}
                 className="text-orange-600 focus:ring-orange-500"
               />
-              <span>Mover (Eliminar del origen)</span>
+              <span>{t('move_delete_original')}</span>
             </label>
           </div>
         </div>
@@ -149,7 +149,7 @@ export const CopyMoveYearModal: React.FC<CopyMoveYearModalProps> = ({ isOpen, on
             {t('cancel')}
           </Button>
           <Button variant="primary" onClick={handleProceed}>
-            <Check size={16} /> Proceder
+            <Check size={16} /> {t('confirm')}
           </Button>
         </div>
       </div>
